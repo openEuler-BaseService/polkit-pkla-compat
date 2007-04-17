@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 /***************************************************************************
  *
- * libpolkit.h : library for querying system-wide policy
+ * polkit.h : library for querying system-wide policy
  *
  * Copyright (C) 2007 David Zeuthen, <david@fubar.dk>
  *
@@ -23,26 +23,26 @@
  *
  **************************************************************************/
 
-#ifndef LIBPOLKIT_H
-#define LIBPOLKIT_H
+#ifndef POLKIT_H
+#define POLKIT_H
 
 #define _POLKIT_INSIDE_POLKIT_H 1
-#include <libpolkit/libpolkit-types.h>
-#include <libpolkit/libpolkit-error.h>
-#include <libpolkit/libpolkit-result.h>
-#include <libpolkit/libpolkit-context.h>
-#include <libpolkit/libpolkit-action.h>
-#include <libpolkit/libpolkit-resource.h>
-#include <libpolkit/libpolkit-seat.h>
-#include <libpolkit/libpolkit-session.h>
-#include <libpolkit/libpolkit-caller.h>
-#include <libpolkit/libpolkit-policy-file-entry.h>
-#include <libpolkit/libpolkit-policy-file.h>
-#include <libpolkit/libpolkit-policy-cache.h>
-#include <libpolkit/libpolkit-policy-default.h>
-#include <libpolkit/libpolkit-module.h>
+#include <polkit/polkit-types.h>
+#include <polkit/polkit-error.h>
+#include <polkit/polkit-result.h>
+#include <polkit/polkit-context.h>
+#include <polkit/polkit-action.h>
+#include <polkit/polkit-resource.h>
+#include <polkit/polkit-seat.h>
+#include <polkit/polkit-session.h>
+#include <polkit/polkit-caller.h>
+#include <polkit/polkit-policy-file-entry.h>
+#include <polkit/polkit-policy-file.h>
+#include <polkit/polkit-policy-cache.h>
+#include <polkit/polkit-policy-default.h>
+#include <polkit/polkit-module.h>
 #undef _POLKIT_INSIDE_POLKIT_H
 
-#endif /* LIBPOLKIT_H */
+#endif /* POLKIT_H */
 
 
