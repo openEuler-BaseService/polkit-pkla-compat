@@ -28,6 +28,7 @@
 
 #define _POLKIT_INSIDE_POLKIT_H 1
 #include <polkit/polkit-types.h>
+#include <polkit/polkit-sysdeps.h>
 #include <polkit/polkit-error.h>
 #include <polkit/polkit-result.h>
 #include <polkit/polkit-context.h>
