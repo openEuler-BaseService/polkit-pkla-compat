@@ -22,6 +22,8 @@
 #ifndef __POLKIT_BACKEND_H
 #define __POLKIT_BACKEND_H
 
+#include <polkit/polkit.h>
+
 #define _POLKIT_BACKEND_INSIDE_POLKIT_BACKEND_H 1
 #include <polkitbackend/polkitbackendtypes.h>
 #include <polkitbackend/polkitbackendauthority.h>
