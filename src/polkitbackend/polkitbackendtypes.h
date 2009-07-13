@@ -27,9 +27,6 @@
 struct _PolkitBackendAuthority;
 typedef struct _PolkitBackendAuthority PolkitBackendAuthority;
 
-struct _PolkitBackendLocalAuthority;
-typedef struct _PolkitBackendLocalAuthority PolkitBackendLocalAuthority;
-
 struct _PolkitBackendSessionMonitor;
 typedef struct _PolkitBackendSessionMonitor PolkitBackendSessionMonitor;
 
@@ -38,6 +35,9 @@ typedef struct _PolkitBackendConfigSource PolkitBackendConfigSource;
 
 struct _PolkitBackendActionLookup;
 typedef struct _PolkitBackendActionLookup PolkitBackendActionLookup; /* Dummy typedef */
+
+struct _PolkitBackendLocalAuthority;
+typedef struct _PolkitBackendLocalAuthority PolkitBackendLocalAuthority;
 
 #endif /* __POLKIT_BACKEND_TYPES_H */
 
