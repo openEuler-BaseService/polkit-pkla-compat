@@ -28,6 +28,7 @@
 #include <polkit/polkitenumtypes.h>
 #include <polkit/polkitimplicitauthorization.h>
 #include <polkit/polkitactiondescription.h>
+#include <polkit/polkitauthorityfeatures.h>
 #include <polkit/polkiterror.h>
 #include <polkit/polkitidentity.h>
 #include <polkit/polkitunixuser.h>
