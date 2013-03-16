@@ -32,10 +32,12 @@ libpolkit_backend_1_la_SOURCES =                                   			\
 	polkitbackendprivate.h								\
 	polkitbackendauthority.h		polkitbackendauthority.c		\
 	polkitbackendinteractiveauthority.h	polkitbackendinteractiveauthority.c	\
+	polkitbackendlocalauthority.h		polkitbackendlocalauthority.c		\
 	polkitbackendjsauthority.h		polkitbackendjsauthority.c		\
 	polkitbackendactionpool.h		polkitbackendactionpool.c		\
 	polkitbackendconfigsource.h		polkitbackendconfigsource.c		\
 	polkitbackendactionlookup.h		polkitbackendactionlookup.c		\
+	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
         $(NULL)
 
 if HAVE_LIBSYSTEMD_LOGIN
@@ -92,7 +94,11 @@ polkitd_LDADD = 				        		\
 
 CLEANFILES = $(BUILT_SOURCES)
 
+localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
+localauthorityconfig_DATA = 50-localauthority.conf
+
 EXTRA_DIST =								\
+	$(localauthorityconfig_DATA)					\
 	init.js								\
 	toarray.pl							\
 	$(rules_DATA)							\
@@ -105,6 +111,13 @@ clean-local :
 	rm -f *~ $(BUILT_SOURCES)
 
 install-data-hook:
+	mkdir -p $(DESTDIR)$(localstatedir)/lib/polkit-1
+	mkdir -p $(DESTDIR)$(localstatedir)/lib/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
+	-chmod 700 $(DESTDIR)$(localstatedir)/lib/polkit-1
+	mkdir -p $(DESTDIR)$(sysconfdir)/polkit-1
+	mkdir -p $(DESTDIR)$(sysconfdir)/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
+	-chmod 700 $(DESTDIR)$(sysconfdir)/polkit-1/localauthority
+	mkdir -p $(DESTDIR)$(libdir)/polkit-1/extensions
 	mkdir -p $(DESTDIR)$(sysconfdir)/polkit-1/rules.d
 	-chmod 700 $(DESTDIR)$(sysconfdir)/polkit-1/rules.d
 	-chown $(POLKITD_USER) $(DESTDIR)$(sysconfdir)/polkit-1/rules.d

@@ -32,6 +32,7 @@
 #include <polkitbackend/polkitbackendtypes.h>
 #include <polkitbackend/polkitbackendauthority.h>
 #include <polkitbackend/polkitbackendinteractiveauthority.h>
+#include <polkitbackend/polkitbackendlocalauthority.h>
 #include <polkitbackend/polkitbackendactionlookup.h>
 #undef _POLKIT_BACKEND_INSIDE_POLKIT_BACKEND_H
 

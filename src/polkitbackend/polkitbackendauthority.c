@@ -30,6 +30,7 @@
 #include <polkit/polkitprivate.h>
 
 #include "polkitbackendauthority.h"
+#include "polkitbackendlocalauthority.h"
 #include "polkitbackendjsauthority.h"
 
 #include "polkitbackendprivate.h"
@@ -40,6 +41,7 @@
  * @short_description: Abstract base class for authority backends
  * @stability: Unstable
  * @see_also: PolkitBackendJsAuthority
+ * @see_also: PolkitBackendLocalAuthority
  *
  * To implement an authority backend, simply subclass #PolkitBackendAuthority
  * and implement the required VFuncs.
