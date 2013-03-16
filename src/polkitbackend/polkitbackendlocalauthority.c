@@ -104,13 +104,9 @@ static PolkitImplicitAuthorization polkit_backend_local_authority_check_authoriz
                                                           PolkitDetails                     *details,
                                                           PolkitImplicitAuthorization        implicit);
 
-G_DEFINE_TYPE_WITH_CODE (PolkitBackendLocalAuthority,
-                         polkit_backend_local_authority,
-                         POLKIT_BACKEND_TYPE_INTERACTIVE_AUTHORITY,
-                         g_io_extension_point_implement (POLKIT_BACKEND_AUTHORITY_EXTENSION_POINT_NAME,
-                                                         g_define_type_id,
-                                                         "local-authority" PACKAGE_VERSION,
-                                                         0));
+G_DEFINE_TYPE (PolkitBackendLocalAuthority,
+	       polkit_backend_local_authority,
+	       POLKIT_BACKEND_TYPE_INTERACTIVE_AUTHORITY);
 
 #define POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), POLKIT_BACKEND_TYPE_LOCAL_AUTHORITY, PolkitBackendLocalAuthorityPrivate))
 

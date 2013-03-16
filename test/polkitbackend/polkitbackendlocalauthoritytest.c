@@ -248,12 +248,6 @@ main (int argc, char *argv[])
   g_test_init (&argc, &argv, NULL);
   polkit_test_redirect_logs ();
 
-  // Register extension point only once. Required to create authority.
-  GIOExtensionPoint *ep = g_io_extension_point_register (
-      POLKIT_BACKEND_AUTHORITY_EXTENSION_POINT_NAME);
-  g_io_extension_point_set_required_type (ep,
-      POLKIT_BACKEND_TYPE_AUTHORITY);
-
   add_check_authorization_tests ();
   g_test_add_func ("/PolkitBackendJsAuthority/get_admin_identities", test_get_admin_identities);
 
