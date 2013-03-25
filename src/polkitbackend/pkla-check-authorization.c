@@ -29,13 +29,8 @@
 #include <locale.h>
 #include <glib/gi18n-lib.h>
 
-/* FIXME: build this properly stand-alone */
-#define _POLKIT_COMPILATION
-#define _POLKIT_BACKEND_COMPILATION
 #include <polkit/polkit.h>
 #include "polkitbackendlocalauthorizationstore.h"
-
-#include <polkit/polkitprivate.h>
 
 /**
  * SECTION:polkitbackendlocalauthority

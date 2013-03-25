@@ -15,13 +15,16 @@ pkla_admin_identities_LDADD =                                        	\
         $(GLIB_LIBS)							\
         $(NULL)
 
+pkla_check_authorization_SOURCES = pkla-check-authorization.c \
+	polkitbackendlocalauthorizationstore.h \
+	polkitbackendlocalauthorizationstore.c
+
 pkla_check_authorization_CFLAGS =                                      	\
         $(POLKIT_CFLAGS)						\
         $(GLIB_CFLAGS)							\
         $(NULL)
 
 pkla_check_authorization_LDADD =                                      	\
-	libpolkit-backend-1.la						\
         $(POLKIT_LIBS)							\
         $(GLIB_LIBS)							\
         $(NULL)
