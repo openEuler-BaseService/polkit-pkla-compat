@@ -77,10 +77,6 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendConfigSou
 
  out:
 
-  /* default to uid 0 if no admin identities has been found */
-  if (ret == NULL)
-    ret = g_list_prepend (ret, polkit_unix_user_new (0));
-
   return ret;
 }
 
