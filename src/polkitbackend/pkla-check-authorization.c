@@ -40,7 +40,6 @@ typedef struct
 {
   gchar **authorization_store_paths;
   GList *authorization_stores;
-  GList *authorization_store_monitors;
 
 } PolkitBackendLocalAuthorityPrivate;
 
@@ -177,19 +176,6 @@ add_all_authorization_stores (PolkitBackendLocalAuthorityPrivate *priv)
 /* ---------------------------------------------------------------------------------------------------- */
 
 static void
-on_toplevel_authority_store_monitor_changed (GFileMonitor     *monitor,
-                                             GFile            *file,
-                                             GFile            *other_file,
-                                             GFileMonitorEvent event_type,
-                                             gpointer          user_data)
-{
-  PolkitBackendLocalAuthorityPrivate *priv = user_data;
-
-  purge_all_authorization_stores (priv);
-  add_all_authorization_stores (priv);
-}
-
-static void
 polkit_backend_local_authority_init (PolkitBackendLocalAuthorityPrivate *priv)
 {
   priv->authorization_store_paths = NULL;
@@ -198,55 +184,13 @@ polkit_backend_local_authority_init (PolkitBackendLocalAuthorityPrivate *priv)
 static void
 polkit_backend_local_authority_constructed (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  guint n;
-
   add_all_authorization_stores (priv);
-
-  /* Monitor the toplevels */
-  priv->authorization_store_monitors = NULL;
-  for (n = 0; priv->authorization_store_paths && priv->authorization_store_paths[n]; n++)
-    {
-      const gchar *toplevel_path;
-      GFile *toplevel_directory;
-      GFileMonitor *monitor;
-      GError *error;
-
-      toplevel_path = priv->authorization_store_paths[n];
-      toplevel_directory = g_file_new_for_path (toplevel_path);
-
-      error = NULL;
-      monitor = g_file_monitor_directory (toplevel_directory,
-                                          G_FILE_MONITOR_NONE,
-                                          NULL,
-                                          &error);
-      if (monitor == NULL)
-        {
-          g_warning ("Error creating file monitor for %s: %s", toplevel_path, error->message);
-          g_error_free (error);
-          g_object_unref (toplevel_directory);
-          continue;
-        }
-
-      g_debug ("Monitoring `%s' for changes", toplevel_path);
-
-      g_signal_connect (monitor,
-                        "changed",
-                        G_CALLBACK (on_toplevel_authority_store_monitor_changed),
-                        priv);
-
-      priv->authorization_store_monitors = g_list_append (priv->authorization_store_monitors, monitor);
-
-      g_object_unref (toplevel_directory);
-    }
-
 }
 
 static void
 polkit_backend_local_authority_finalize (PolkitBackendLocalAuthorityPrivate *priv)
 {
   purge_all_authorization_stores (priv);
-
-  g_list_free_full (priv->authorization_store_monitors, g_object_unref);
 
   g_strfreev (priv->authorization_store_paths);
 }
