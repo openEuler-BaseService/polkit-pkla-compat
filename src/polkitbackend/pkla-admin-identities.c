@@ -46,7 +46,13 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendConfigSou
                                                                    &error);
   if (admin_identities == NULL)
     {
-      g_warning ("Error getting admin_identities configuration item: %s", error->message);
+      if (g_error_matches (error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_NOT_FOUND))
+	/* Can happen if the configuration is in a JavaScript .rule */
+	g_debug ("Error getting admin_identities configuration item: %s",
+		 error->message);
+      else
+	g_warning ("Error getting admin_identities configuration item: %s",
+		   error->message);
       g_error_free (error);
       goto out;
     }
