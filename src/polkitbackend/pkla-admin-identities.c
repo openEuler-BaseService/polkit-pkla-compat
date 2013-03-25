@@ -21,9 +21,6 @@
 
 #include "config.h"
 #include <errno.h>
-#include <pwd.h>
-#include <grp.h>
-#include <netdb.h>
 #include <string.h>
 #include <glib/gstdio.h>
 #include <locale.h>
@@ -31,16 +28,6 @@
 #include <polkit/polkit.h>
 
 #include "polkitbackendconfigsource.h"
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-static GList *get_users_in_group (PolkitIdentity              *group,
-                                  gboolean                     include_root);
-
-static GList *get_users_in_net_group (PolkitIdentity          *group,
-                                      gboolean                 include_root);
-
-/* ---------------------------------------------------------------------------------------------------- */
 
 typedef struct
 {
@@ -118,22 +105,7 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuth
           continue;
         }
 
-      if (POLKIT_IS_UNIX_USER (identity))
-        {
-          ret = g_list_append (ret, identity);
-        }
-      else if (POLKIT_IS_UNIX_GROUP (identity))
-        {
-          ret = g_list_concat (ret, get_users_in_group (identity, FALSE));
-        }
-      else if (POLKIT_IS_UNIX_NETGROUP (identity))
-        {
-          ret =  g_list_concat (ret, get_users_in_net_group (identity, FALSE));
-        }
-      else
-        {
-          g_warning ("Unsupported identity %s", admin_identities[n]);
-        }
+      ret = g_list_append (ret, identity);
     }
 
   g_strfreev (admin_identities);
@@ -146,107 +118,6 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuth
 
   return ret;
 }
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-static GList *
-get_users_in_group (PolkitIdentity                    *group,
-                    gboolean                           include_root)
-{
-  gid_t gid;
-  struct group *grp;
-  GList *ret;
-  guint n;
-
-  ret = NULL;
-
-  gid = polkit_unix_group_get_gid (POLKIT_UNIX_GROUP (group));
-  grp = getgrgid (gid);
-  if (grp == NULL)
-    {
-      g_warning ("Error looking up group with gid %d: %s", gid, g_strerror (errno));
-      goto out;
-    }
-
-  for (n = 0; grp->gr_mem != NULL && grp->gr_mem[n] != NULL; n++)
-    {
-      PolkitIdentity *user;
-      GError *error;
-
-      if (!include_root && g_strcmp0 (grp->gr_mem[n], "root") == 0)
-        continue;
-
-      error = NULL;
-      user = polkit_unix_user_new_for_name (grp->gr_mem[n], &error);
-      if (user == NULL)
-        {
-          g_warning ("Unknown username '%s' in group: %s", grp->gr_mem[n], error->message);
-          g_error_free (error);
-        }
-      else
-        {
-          ret = g_list_prepend (ret, user);
-        }
-    }
-
-  ret = g_list_reverse (ret);
-
- out:
-  return ret;
-}
-
-static GList *
-get_users_in_net_group (PolkitIdentity                    *group,
-                        gboolean                           include_root)
-{
-  const gchar *name;
-  GList *ret;
-
-  ret = NULL;
-  name = polkit_unix_netgroup_get_name (POLKIT_UNIX_NETGROUP (group));
-
-  if (setnetgrent (name) == 0)
-    {
-      g_warning ("Error looking up net group with name %s: %s", name, g_strerror (errno));
-      goto out;
-    }
-
-  for (;;)
-    {
-      char *hostname, *username, *domainname;
-      PolkitIdentity *user;
-      GError *error = NULL;
-
-      if (getnetgrent (&hostname, &username, &domainname) == 0)
-        break;
-
-      /* Skip NULL entries since we never want to make everyone an admin
-       * Skip "-" entries which mean "no match ever" in netgroup land */
-      if (username == NULL || g_strcmp0 (username, "-") == 0)
-        continue;
-
-      /* TODO: Should we match on hostname? Maybe only allow "-" as a hostname
-       * for safety. */
-
-      user = polkit_unix_user_new_for_name (username, &error);
-      if (user == NULL)
-        {
-          g_warning ("Unknown username '%s' in unix-netgroup: %s", username, error->message);
-          g_error_free (error);
-        }
-      else
-        {
-          ret = g_list_prepend (ret, user);
-        }
-    }
-
-  ret = g_list_reverse (ret);
-
- out:
-  endnetgrent ();
-  return ret;
-}
-
 
 int
 main (void)
