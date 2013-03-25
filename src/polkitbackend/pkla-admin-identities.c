@@ -32,18 +32,6 @@
 
 #include "polkitbackendconfigsource.h"
 
-/**
- * SECTION:polkitbackendlocalauthority
- * @title: PolkitBackendLocalAuthority
- * @short_description: Local Authority
- * @stability: Unstable
- *
- * An implementation of #PolkitBackendAuthority that stores
- * authorizations on the local file system, supports interaction with
- * authentication agents (virtue of being based on
- * #PolkitBackendInteractiveAuthority).
- */
-
 /* ---------------------------------------------------------------------------------------------------- */
 
 static GList *get_users_in_group (PolkitIdentity              *group,
@@ -59,16 +47,6 @@ typedef struct
   gchar *config_path;
   PolkitBackendConfigSource *config_source;
 } PolkitBackendLocalAuthorityPrivate;
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-enum
-{
-  PROP_0,
-
-  // Path overrides used for unit testing
-  PROP_CONFIG_PATH,
-};
 
 /* ---------------------------------------------------------------------------------------------------- */
 
