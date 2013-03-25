@@ -1,6 +1,6 @@
 NULL =
 
-bin_PROGRAMS = pkla-admin-identities
+bin_PROGRAMS = pkla-admin-identities pkla-check-authorization
 
 pkla_admin_identities_SOURCES = pkla-admin-identities.c \
 	polkitbackendconfigsource.h polkitbackendconfigsource.c
@@ -11,6 +11,17 @@ pkla_admin_identities_CFLAGS =                                        	\
         $(NULL)
 
 pkla_admin_identities_LDADD =                                        	\
+        $(POLKIT_LIBS)							\
+        $(GLIB_LIBS)							\
+        $(NULL)
+
+pkla_check_authorization_CFLAGS =                                      	\
+        $(POLKIT_CFLAGS)						\
+        $(GLIB_CFLAGS)							\
+        $(NULL)
+
+pkla_check_authorization_LDADD =                                      	\
+	libpolkit-backend-1.la						\
         $(POLKIT_LIBS)							\
         $(GLIB_LIBS)							\
         $(NULL)
