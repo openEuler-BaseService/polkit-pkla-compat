@@ -78,133 +78,46 @@ enum
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-static GList *polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendInteractiveAuthority *authority,
-                                                                        PolkitSubject                     *caller,
-                                                                        PolkitSubject                     *subject,
-                                                                        PolkitIdentity                    *user_for_subject,
-									gboolean                           subject_is_local,
-									gboolean                           subject_is_active,
-                                                                        const gchar                       *action_id,
-                                                                        PolkitDetails                     *details);
-
-G_DEFINE_TYPE (PolkitBackendLocalAuthority,
-	       polkit_backend_local_authority,
-	       POLKIT_BACKEND_TYPE_INTERACTIVE_AUTHORITY);
-
-#define POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), POLKIT_BACKEND_TYPE_LOCAL_AUTHORITY, PolkitBackendLocalAuthorityPrivate))
-
-/* ---------------------------------------------------------------------------------------------------- */
-
 static void
-polkit_backend_local_authority_init (PolkitBackendLocalAuthority *authority)
+polkit_backend_local_authority_init (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
-
   priv->config_path = NULL;
 }
 
 static void
-polkit_backend_local_authority_constructed (GObject *object)
+polkit_backend_local_authority_constructed (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
   GFile *config_directory;
-
-  authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
 
   g_debug ("Using config directory `%s'", priv->config_path);
   config_directory = g_file_new_for_path (priv->config_path);
   priv->config_source = polkit_backend_config_source_new (config_directory);
   g_object_unref (config_directory);
-
-  G_OBJECT_CLASS (polkit_backend_local_authority_parent_class)->constructed (object);
 }
 
 static void
-polkit_backend_local_authority_finalize (GObject *object)
+polkit_backend_local_authority_finalize (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
-
   if (priv->config_source != NULL)
     g_object_unref (priv->config_source);
 
   g_free (priv->config_path);
-
-  G_OBJECT_CLASS (polkit_backend_local_authority_parent_class)->finalize (object);
 }
 
 static void
-polkit_backend_local_authority_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+polkit_backend_local_authority_set_config_path (PolkitBackendLocalAuthorityPrivate *priv, const char *path)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
-
-  switch (property_id)
-    {
-      case PROP_CONFIG_PATH:
-        g_free (priv->config_path);
-        priv->config_path = g_value_dup_string (value);
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-        break;
-    }
-}
-
-static void
-polkit_backend_local_authority_class_init (PolkitBackendLocalAuthorityClass *klass)
-{
-  GObjectClass *gobject_class;
-  PolkitBackendInteractiveAuthorityClass *interactive_authority_class;
-  GParamSpec *pspec;
-
-  gobject_class = G_OBJECT_CLASS (klass);
-  interactive_authority_class = POLKIT_BACKEND_INTERACTIVE_AUTHORITY_CLASS (klass);
-
-  gobject_class->set_property                           = polkit_backend_local_authority_set_property;
-  gobject_class->finalize                               = polkit_backend_local_authority_finalize;
-  gobject_class->constructed                            = polkit_backend_local_authority_constructed;
-  interactive_authority_class->get_admin_identities     = polkit_backend_local_authority_get_admin_auth_identities;
-
-  pspec = g_param_spec_string ("config-path",
-                               "Local Authority Configuration Path",
-                               "Path to directory of LocalAuthority config files.",
-                               PACKAGE_SYSCONF_DIR "/polkit-1/localauthority.conf.d",
-                               G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
-  g_object_class_install_property (gobject_class, PROP_CONFIG_PATH, pspec);
-
-  g_type_class_add_private (klass, sizeof (PolkitBackendLocalAuthorityPrivate));
+  g_free (priv->config_path);
+  priv->config_path = g_strdup (path);
 }
 
 static GList *
-polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendInteractiveAuthority *authority,
-                                                          PolkitSubject                     *caller,
-                                                          PolkitSubject                     *subject,
-                                                          PolkitIdentity                    *user_for_subject,
-							  gboolean                           subject_is_local,
-							  gboolean                           subject_is_active,
-                                                          const gchar                       *action_id,
-                                                          PolkitDetails                     *details)
+polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
   GList *ret;
   guint n;
   gchar **admin_identities;
   GError *error;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (authority);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
 
   ret = NULL;
 
@@ -366,5 +279,36 @@ get_users_in_net_group (PolkitIdentity                    *group,
 int
 main (void)
 {
+  PolkitBackendLocalAuthorityPrivate priv;
+  GList *identities, *l;
+
+  g_type_init ();
+
+  memset (&priv, 0, sizeof (priv));
+
+  polkit_backend_local_authority_init (&priv);
+  /* To be used for documentation:
+     "config-path", "Local Authority Configuration Path",
+     "Path to directory of LocalAuthority config files.", */
+  polkit_backend_local_authority_set_config_path (&priv,
+						  PACKAGE_SYSCONF_DIR "/polkit-1/localauthority.conf.d");
+  polkit_backend_local_authority_constructed (&priv);
+
+  identities = polkit_backend_local_authority_get_admin_auth_identities(&priv);
+  for (l = identities; l != NULL; l = l->next)
+    {
+      PolkitIdentity *identity;
+      gchar *s;
+
+      identity = POLKIT_IDENTITY (l->data);
+      s = polkit_identity_to_string (identity);
+      printf ("%s\n", s);
+      g_free (s);
+    }
+  g_list_foreach (identities, (GFunc) g_object_unref, NULL);
+  g_list_free (identities);
+
+  polkit_backend_local_authority_finalize (&priv);
+
   return 0;
 }
