@@ -345,24 +345,6 @@ polkit_backend_local_authority_finalize (GObject *object)
   G_OBJECT_CLASS (polkit_backend_local_authority_parent_class)->finalize (object);
 }
 
-static const gchar *
-polkit_backend_local_authority_get_name (PolkitBackendAuthority *authority)
-{
-  return "local";
-}
-
-static const gchar *
-polkit_backend_local_authority_get_version (PolkitBackendAuthority *authority)
-{
-  return PACKAGE_VERSION;
-}
-
-static PolkitAuthorityFeatures
-polkit_backend_local_authority_get_features (PolkitBackendAuthority *authority)
-{
-  return POLKIT_AUTHORITY_FEATURES_TEMPORARY_AUTHORIZATION;
-}
-
 static void
 polkit_backend_local_authority_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
@@ -388,20 +370,15 @@ static void
 polkit_backend_local_authority_class_init (PolkitBackendLocalAuthorityClass *klass)
 {
   GObjectClass *gobject_class;
-  PolkitBackendAuthorityClass *authority_class;
   PolkitBackendInteractiveAuthorityClass *interactive_authority_class;
   GParamSpec *pspec;
 
   gobject_class = G_OBJECT_CLASS (klass);
-  authority_class = POLKIT_BACKEND_AUTHORITY_CLASS (klass);
   interactive_authority_class = POLKIT_BACKEND_INTERACTIVE_AUTHORITY_CLASS (klass);
 
   gobject_class->set_property                           = polkit_backend_local_authority_set_property;
   gobject_class->finalize                               = polkit_backend_local_authority_finalize;
   gobject_class->constructed                            = polkit_backend_local_authority_constructed;
-  authority_class->get_name                             = polkit_backend_local_authority_get_name;
-  authority_class->get_version                          = polkit_backend_local_authority_get_version;
-  authority_class->get_features                         = polkit_backend_local_authority_get_features;
   interactive_authority_class->check_authorization_sync = polkit_backend_local_authority_check_authorization_sync;
 
   pspec = g_param_spec_string ("auth-store-paths",
