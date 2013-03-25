@@ -32,20 +32,6 @@
 #include <polkit/polkit.h>
 #include "polkitbackendlocalauthorizationstore.h"
 
-/**
- * SECTION:polkitbackendlocalauthority
- * @title: PolkitBackendLocalAuthority
- * @short_description: Local Authority
- * @stability: Unstable
- *
- * An implementation of #PolkitBackendAuthority that stores
- * authorizations on the local file system, supports interaction with
- * authentication agents (virtue of being based on
- * #PolkitBackendInteractiveAuthority).
- */
-
-/* ---------------------------------------------------------------------------------------------------- */
-
 static GList *get_groups_for_user (PolkitIdentity              *user);
 
 /* ---------------------------------------------------------------------------------------------------- */
