@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <glib/gstdio.h>
 #include <locale.h>
@@ -80,22 +81,56 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendConfigSou
   return ret;
 }
 
+static gchar *config_path; /* = NULL; */
+
+/* Use G_OPTION_ARG_FILENAME for all strings to avoid the conversion to
+   UTF-8. */
+static const GOptionEntry opt_entries[] =
+  {
+    { "config-path", 'c', 0, G_OPTION_ARG_FILENAME, &config_path,
+      N_("Use configuration files in DIR"), N_("DIR"),
+    },
+    { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+  };
+
 int
-main (void)
+main (int argc, char *argv[])
 {
-  gchar *config_path;
+  GError *error;
+  GOptionContext *opt_context;
   GFile *config_directory;
   PolkitBackendConfigSource *config_source;
   GList *identities, *l;
 
   g_type_init ();
 
-  /* To be used for documentation:
-     "config-path", "Local Authority Configuration Path",
-     "Path to directory of LocalAuthority config files.", */
-  config_path = g_strdup (PACKAGE_SYSCONF_DIR
-			  "/polkit-1/localauthority.conf.d");
+  opt_context = g_option_context_new ("");
+  g_option_context_set_summary (opt_context,
+				N_("Interprets pklocalauthority(8) "
+				   "configuration files."));
+  g_option_context_add_main_entries (opt_context, opt_entries, PACKAGE_NAME);
+  error = NULL;
+  if (!g_option_context_parse (opt_context, &argc, &argv, &error))
+    {
+      fprintf (stderr, _("%s: %s\n"
+			 "Run `%s --help' for more information.\n"),
+	       g_get_prgname (), error->message, g_get_prgname ());
+      g_error_free (error);
+      g_option_context_free (opt_context);
+      return EXIT_FAILURE;
+    }
+  g_option_context_free (opt_context);
+  if (argc != 1)
+    {
+      fprintf (stderr, _("Unexpected argument\n"
+			 "Run `%s --help' for more information.\n"),
+	       g_get_prgname ());
+      return EXIT_FAILURE;
+    }
 
+  if (config_path == NULL)
+    config_path = g_strdup (PACKAGE_SYSCONF_DIR
+			    "/polkit-1/localauthority.conf.d");
   g_debug ("Using config directory `%s'", config_path);
   config_directory = g_file_new_for_path (config_path);
   g_free (config_path);
