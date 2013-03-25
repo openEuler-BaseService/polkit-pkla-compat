@@ -29,49 +29,8 @@
 
 #include "polkitbackendconfigsource.h"
 
-typedef struct
-{
-  gchar *config_path;
-  PolkitBackendConfigSource *config_source;
-} PolkitBackendLocalAuthorityPrivate;
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-static void
-polkit_backend_local_authority_init (PolkitBackendLocalAuthorityPrivate *priv)
-{
-  priv->config_path = NULL;
-}
-
-static void
-polkit_backend_local_authority_constructed (PolkitBackendLocalAuthorityPrivate *priv)
-{
-  GFile *config_directory;
-
-  g_debug ("Using config directory `%s'", priv->config_path);
-  config_directory = g_file_new_for_path (priv->config_path);
-  priv->config_source = polkit_backend_config_source_new (config_directory);
-  g_object_unref (config_directory);
-}
-
-static void
-polkit_backend_local_authority_finalize (PolkitBackendLocalAuthorityPrivate *priv)
-{
-  if (priv->config_source != NULL)
-    g_object_unref (priv->config_source);
-
-  g_free (priv->config_path);
-}
-
-static void
-polkit_backend_local_authority_set_config_path (PolkitBackendLocalAuthorityPrivate *priv, const char *path)
-{
-  g_free (priv->config_path);
-  priv->config_path = g_strdup (path);
-}
-
 static GList *
-polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuthorityPrivate *priv)
+polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendConfigSource *config_source)
 {
   GList *ret;
   guint n;
@@ -81,7 +40,7 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuth
   ret = NULL;
 
   error = NULL;
-  admin_identities = polkit_backend_config_source_get_string_list (priv->config_source,
+  admin_identities = polkit_backend_config_source_get_string_list (config_source,
                                                                    "Configuration",
                                                                    "AdminIdentities",
                                                                    &error);
@@ -122,22 +81,27 @@ polkit_backend_local_authority_get_admin_auth_identities (PolkitBackendLocalAuth
 int
 main (void)
 {
-  PolkitBackendLocalAuthorityPrivate priv;
+  gchar *config_path;
+  GFile *config_directory;
+  PolkitBackendConfigSource *config_source;
   GList *identities, *l;
 
   g_type_init ();
 
-  memset (&priv, 0, sizeof (priv));
-
-  polkit_backend_local_authority_init (&priv);
   /* To be used for documentation:
      "config-path", "Local Authority Configuration Path",
      "Path to directory of LocalAuthority config files.", */
-  polkit_backend_local_authority_set_config_path (&priv,
-						  PACKAGE_SYSCONF_DIR "/polkit-1/localauthority.conf.d");
-  polkit_backend_local_authority_constructed (&priv);
+  config_path = g_strdup (PACKAGE_SYSCONF_DIR
+			  "/polkit-1/localauthority.conf.d");
 
-  identities = polkit_backend_local_authority_get_admin_auth_identities(&priv);
+  g_debug ("Using config directory `%s'", config_path);
+  config_directory = g_file_new_for_path (config_path);
+  g_free (config_path);
+
+  config_source = polkit_backend_config_source_new (config_directory);
+  g_object_unref (config_directory);
+
+  identities = polkit_backend_local_authority_get_admin_auth_identities (config_source);
   for (l = identities; l != NULL; l = l->next)
     {
       PolkitIdentity *identity;
@@ -151,7 +115,7 @@ main (void)
   g_list_foreach (identities, (GFunc) g_object_unref, NULL);
   g_list_free (identities);
 
-  polkit_backend_local_authority_finalize (&priv);
+  g_object_unref (config_source);
 
   return 0;
 }
