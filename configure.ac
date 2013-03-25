@@ -129,6 +129,10 @@ PKG_CHECK_MODULES(LIBJS, [mozjs185])
 AC_SUBST(LIBJS_CFLAGS)
 AC_SUBST(LIBJS_LIBS)
 
+PKG_CHECK_MODULES([POLKIT], [polkit-gobject-1])
+AC_SUBST([POLKIT_CFLAGS])
+AC_SUBST([POLKIT_LIBS])
+
 EXPAT_LIB=""
 AC_ARG_WITH(expat, [  --with-expat=<dir>      Use expat from here],
                       [

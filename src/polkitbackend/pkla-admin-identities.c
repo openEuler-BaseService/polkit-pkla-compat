@@ -28,15 +28,9 @@
 #include <glib/gstdio.h>
 #include <locale.h>
 #include <glib/gi18n-lib.h>
-
-/* FIXME: drop the defines and limit to standard APIs? */
-#define _POLKIT_COMPILATION
-#define _POLKIT_BACKEND_COMPILATION
 #include <polkit/polkit.h>
-#include "polkitbackendconfigsource.h"
-#include "polkitbackendlocalauthority.h"
 
-#include <polkit/polkitprivate.h>
+#include "polkitbackendconfigsource.h"
 
 /**
  * SECTION:polkitbackendlocalauthority

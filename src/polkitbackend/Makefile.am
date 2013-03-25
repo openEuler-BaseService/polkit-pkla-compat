@@ -2,13 +2,17 @@ NULL =
 
 bin_PROGRAMS = pkla-admin-identities
 
+pkla_admin_identities_SOURCES = pkla-admin-identities.c \
+	polkitbackendconfigsource.h polkitbackendconfigsource.c
+
 pkla_admin_identities_CFLAGS =                                        	\
+        $(POLKIT_CFLAGS)						\
         $(GLIB_CFLAGS)							\
         $(NULL)
 
 pkla_admin_identities_LDADD =                                        	\
+        $(POLKIT_LIBS)							\
         $(GLIB_LIBS)							\
-	libpolkit-backend-1.la						\
         $(NULL)
 
 BUILT_SOURCES =
