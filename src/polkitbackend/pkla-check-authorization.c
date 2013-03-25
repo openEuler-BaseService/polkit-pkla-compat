@@ -33,7 +33,6 @@
 #define _POLKIT_COMPILATION
 #define _POLKIT_BACKEND_COMPILATION
 #include <polkit/polkit.h>
-#include "polkitbackendlocalauthority.h"
 #include "polkitbackendlocalauthorizationstore.h"
 
 #include <polkit/polkitprivate.h>
@@ -66,60 +65,14 @@ typedef struct
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-enum
-{
-  PROP_0,
-
-  // Path overrides used for unit testing
-  PROP_AUTH_STORE_PATHS,
-};
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-static PolkitImplicitAuthorization polkit_backend_local_authority_check_authorization_sync (
-                                                          PolkitBackendInteractiveAuthority *authority,
-                                                          PolkitSubject                     *caller,
-                                                          PolkitSubject                     *subject,
-                                                          PolkitIdentity                    *user_for_subject,
-                                                          gboolean                           subject_is_local,
-                                                          gboolean                           subject_is_active,
-                                                          const gchar                       *action_id,
-                                                          PolkitDetails                     *details,
-                                                          PolkitImplicitAuthorization        implicit);
-
-G_DEFINE_TYPE (PolkitBackendLocalAuthority,
-	       polkit_backend_local_authority,
-	       POLKIT_BACKEND_TYPE_INTERACTIVE_AUTHORITY);
-
-#define POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), POLKIT_BACKEND_TYPE_LOCAL_AUTHORITY, PolkitBackendLocalAuthorityPrivate))
-
-/* ---------------------------------------------------------------------------------------------------- */
-
 static void
-on_store_changed (PolkitBackendLocalAuthorizationStore *store,
-                  gpointer                              user_data)
+purge_all_authorization_stores (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *authority = POLKIT_BACKEND_LOCAL_AUTHORITY (user_data);
-
-  g_signal_emit_by_name (authority, "changed");
-}
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-static void
-purge_all_authorization_stores (PolkitBackendLocalAuthority *authority)
-{
-  PolkitBackendLocalAuthorityPrivate *priv;
   GList *l;
-
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
 
   for (l = priv->authorization_stores; l != NULL; l = l->next)
     {
       PolkitBackendLocalAuthorizationStore *store = POLKIT_BACKEND_LOCAL_AUTHORIZATION_STORE (l->data);
-      g_signal_handlers_disconnect_by_func (store,
-                                            G_CALLBACK (on_store_changed),
-                                            authority);
       g_object_unref (store);
     }
   g_list_free (priv->authorization_stores);
@@ -131,21 +84,13 @@ purge_all_authorization_stores (PolkitBackendLocalAuthority *authority)
 /* ---------------------------------------------------------------------------------------------------- */
 
 static void
-add_one_authorization_store (PolkitBackendLocalAuthority *authority,
+add_one_authorization_store (PolkitBackendLocalAuthorityPrivate *priv,
                              GFile                       *directory)
 {
   PolkitBackendLocalAuthorizationStore *store;
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
 
   store = polkit_backend_local_authorization_store_new (directory, ".pkla");
   priv->authorization_stores = g_list_append (priv->authorization_stores, store);
-
-  g_signal_connect (store,
-                    "changed",
-                    G_CALLBACK (on_store_changed),
-                    authority);
 }
 
 static gint
@@ -162,14 +107,12 @@ authorization_store_path_compare_func (GFile *file_a,
 }
 
 static void
-add_all_authorization_stores (PolkitBackendLocalAuthority *authority)
+add_all_authorization_stores (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthorityPrivate *priv;
   guint n;
   GList *directories;
   GList *l;
 
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
   directories = NULL;
 
   for (n = 0; priv->authorization_store_paths && priv->authorization_store_paths[n]; n++)
@@ -243,7 +186,7 @@ add_all_authorization_stores (PolkitBackendLocalAuthority *authority)
       g_debug ("Added `%s' as a local authorization store", name);
       g_free (name);
 
-      add_one_authorization_store (authority, directory);
+      add_one_authorization_store (priv, directory);
     }
 
   g_list_foreach (directories, (GFunc) g_object_unref, NULL);
@@ -259,33 +202,24 @@ on_toplevel_authority_store_monitor_changed (GFileMonitor     *monitor,
                                              GFileMonitorEvent event_type,
                                              gpointer          user_data)
 {
-  PolkitBackendLocalAuthority *authority = POLKIT_BACKEND_LOCAL_AUTHORITY (user_data);
+  PolkitBackendLocalAuthorityPrivate *priv = user_data;
 
-  purge_all_authorization_stores (authority);
-  add_all_authorization_stores (authority);
+  purge_all_authorization_stores (priv);
+  add_all_authorization_stores (priv);
 }
 
 static void
-polkit_backend_local_authority_init (PolkitBackendLocalAuthority *authority)
+polkit_backend_local_authority_init (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
-
   priv->authorization_store_paths = NULL;
 }
 
 static void
-polkit_backend_local_authority_constructed (GObject *object)
+polkit_backend_local_authority_constructed (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
   guint n;
 
-  authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (authority);
-
-  add_all_authorization_stores (authority);
+  add_all_authorization_stores (priv);
 
   /* Monitor the toplevels */
   priv->authorization_store_monitors = NULL;
@@ -317,96 +251,42 @@ polkit_backend_local_authority_constructed (GObject *object)
       g_signal_connect (monitor,
                         "changed",
                         G_CALLBACK (on_toplevel_authority_store_monitor_changed),
-                        authority);
+                        priv);
 
       priv->authorization_store_monitors = g_list_append (priv->authorization_store_monitors, monitor);
 
       g_object_unref (toplevel_directory);
     }
 
-  G_OBJECT_CLASS (polkit_backend_local_authority_parent_class)->constructed (object);
 }
 
 static void
-polkit_backend_local_authority_finalize (GObject *object)
+polkit_backend_local_authority_finalize (PolkitBackendLocalAuthorityPrivate *priv)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
-
-  purge_all_authorization_stores (local_authority);
+  purge_all_authorization_stores (priv);
 
   g_list_free_full (priv->authorization_store_monitors, g_object_unref);
 
   g_strfreev (priv->authorization_store_paths);
-
-  G_OBJECT_CLASS (polkit_backend_local_authority_parent_class)->finalize (object);
 }
 
 static void
-polkit_backend_local_authority_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+polkit_backend_local_authority_set_auth_store_paths (PolkitBackendLocalAuthorityPrivate *priv, const char *paths)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (object);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
-
-  switch (property_id)
-    {
-      case PROP_AUTH_STORE_PATHS:
-        g_strfreev (priv->authorization_store_paths);
-        priv->authorization_store_paths = g_strsplit (g_value_get_string (value), ";", 0);
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-        break;
-    }
-}
-
-static void
-polkit_backend_local_authority_class_init (PolkitBackendLocalAuthorityClass *klass)
-{
-  GObjectClass *gobject_class;
-  PolkitBackendInteractiveAuthorityClass *interactive_authority_class;
-  GParamSpec *pspec;
-
-  gobject_class = G_OBJECT_CLASS (klass);
-  interactive_authority_class = POLKIT_BACKEND_INTERACTIVE_AUTHORITY_CLASS (klass);
-
-  gobject_class->set_property                           = polkit_backend_local_authority_set_property;
-  gobject_class->finalize                               = polkit_backend_local_authority_finalize;
-  gobject_class->constructed                            = polkit_backend_local_authority_constructed;
-  interactive_authority_class->check_authorization_sync = polkit_backend_local_authority_check_authorization_sync;
-
-  pspec = g_param_spec_string ("auth-store-paths",
-                               "Local Authorization Store Paths",
-                               "Semi-colon separated list of Authorization Store 'top' directories.",
-                               PACKAGE_LOCALSTATE_DIR "/lib/polkit-1/localauthority;"
-                               PACKAGE_SYSCONF_DIR "/polkit-1/localauthority",
-                               G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
-  g_object_class_install_property (gobject_class, PROP_AUTH_STORE_PATHS, pspec);
-
-  g_type_class_add_private (klass, sizeof (PolkitBackendLocalAuthorityPrivate));
+  g_strfreev (priv->authorization_store_paths);
+  priv->authorization_store_paths = g_strsplit (paths, ";", 0);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
 
 static PolkitImplicitAuthorization
-polkit_backend_local_authority_check_authorization_sync (PolkitBackendInteractiveAuthority *authority,
-                                                         PolkitSubject                     *caller,
-                                                         PolkitSubject                     *subject,
+polkit_backend_local_authority_check_authorization_sync (PolkitBackendLocalAuthorityPrivate *priv,
                                                          PolkitIdentity                    *user_for_subject,
                                                          gboolean                           subject_is_local,
                                                          gboolean                           subject_is_active,
                                                          const gchar                       *action_id,
-                                                         PolkitDetails                     *details,
-                                                         PolkitImplicitAuthorization        implicit)
+                                                         PolkitDetails                     *details)
 {
-  PolkitBackendLocalAuthority *local_authority;
-  PolkitBackendLocalAuthorityPrivate *priv;
   PolkitImplicitAuthorization ret;
   PolkitImplicitAuthorization ret_any;
   PolkitImplicitAuthorization ret_inactive;
@@ -414,10 +294,7 @@ polkit_backend_local_authority_check_authorization_sync (PolkitBackendInteractiv
   GList *groups;
   GList *l, *ll;
 
-  ret = implicit;
-
-  local_authority = POLKIT_BACKEND_LOCAL_AUTHORITY (authority);
-  priv = POLKIT_BACKEND_LOCAL_AUTHORITY_GET_PRIVATE (local_authority);
+  ret = POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN;
 
 #if 0
   g_debug ("local: checking `%s' for subject `%s' (user `%s')",
@@ -544,8 +421,64 @@ get_groups_for_user (PolkitIdentity *user)
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-int
-main (void)
+static gboolean
+parse_boolean (const char *arg, GError **error)
 {
+  if (strcmp (arg, "true") == 0)
+    return TRUE;
+  if (strcmp (arg, "false") == 0)
+    return FALSE;
+  g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+	       _("Invalid boolean value"));
+  return FALSE;
+}
+
+int
+main (int argc, char *argv[])
+{
+  GError *error;
+  PolkitBackendLocalAuthorityPrivate priv;
+  PolkitIdentity *user_for_subject;
+  gboolean subject_is_local, subject_is_active;
+  PolkitDetails *details;
+  PolkitImplicitAuthorization result;
+
+  g_type_init ();
+
+  memset (&priv, 0, sizeof (priv));
+  polkit_backend_local_authority_init (&priv);
+  /* "Local Authorization Store Paths",
+     "Semi-colon separated list of Authorization Store 'top' directories." */
+  polkit_backend_local_authority_set_auth_store_paths (&priv,
+						       PACKAGE_LOCALSTATE_DIR "/lib/polkit-1/localauthority;"
+						       PACKAGE_SYSCONF_DIR "/polkit-1/localauthority");
+  polkit_backend_local_authority_constructed (&priv);
+
+  g_assert (argc == 5);
+  error = NULL;
+  user_for_subject = polkit_unix_user_new_for_name(argv[1], &error);
+  if (user_for_subject == NULL)
+    g_assert_not_reached(); /* FIXME */
+  subject_is_local = parse_boolean(argv[2], &error);
+  if (error != NULL)
+    g_assert_not_reached(); /* FIXME */
+  subject_is_active = parse_boolean(argv[3], &error);
+  if (error != NULL)
+    g_assert_not_reached(); /* FIXME */
+
+  /* polkitlocalauthority used to be able to change details, but that is no
+     longer supported in the JS authority, and was not apparently used
+     anyway.  Just submit a dummy object. */
+  details = polkit_details_new ();
+  result = polkit_backend_local_authority_check_authorization_sync
+    (&priv, user_for_subject, subject_is_local, subject_is_active, argv[4],
+     details);
+  g_object_unref (details);
+
+  polkit_backend_local_authority_finalize (&priv);
+
+  if (result != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
+    printf ("%s\n", polkit_implicit_authorization_to_string (result));
+
   return 0;
 }
