@@ -370,7 +370,7 @@ polkit_backend_config_source_ensure (PolkitBackendConfigSource *source)
       if (!g_key_file_load_from_file (key_file,
                                       filename,
                                       G_KEY_FILE_NONE,
-                                      NULL))
+                                      &error))
         {
           g_warning ("Error loading key-file %s: %s", filename, error->message);
           g_error_free (error);
