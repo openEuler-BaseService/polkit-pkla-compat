@@ -95,7 +95,7 @@ libpolkit_backend_1_la_LIBADD =                               		\
         $(NULL)
 
 rulesdir = $(sysconfdir)/polkit-1/rules.d
-rules_DATA = 50-default.rules
+rules_DATA = 50-pkla.rules
 
 # ----------------------------------------------------------------------------------------------------
 
