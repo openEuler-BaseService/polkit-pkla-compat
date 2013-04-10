@@ -12,3 +12,24 @@ ResultAny=no
 ResultInactive=auth_self
 ResultActive=yes
 
+[Default for defaults-test]
+Identity=default
+Action=com.example.awesomeproduct.defaults-test
+ResultAny=no
+ResultInactive=no
+ResultActive=auth_admin
+
+[Group override for defaults-test]
+Identity=unix-group:admin
+Action=com.example.awesomeproduct.defaults-test
+ResultAny=no
+ResultInactive=no
+ResultActive=auth_self
+
+[User override for defaults-test]
+Identity=unix-user:john
+Action=com.example.awesomeproduct.defaults-test
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+

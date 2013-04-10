@@ -224,6 +224,17 @@ struct auth_context check_authorization_test_data [] = {
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
 
+  /* Test user/group/default handling */
+  {"unix-user:john", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+      POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
+      POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
+  {"unix-user:sally", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+      POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
+      POLKIT_IMPLICIT_AUTHORIZATION_AUTHENTICATION_REQUIRED},
+  {"unix-user:jane", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+      POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
+      POLKIT_IMPLICIT_AUTHORIZATION_ADMINISTRATOR_AUTHENTICATION_REQUIRED},
+
   {NULL},
 };
 

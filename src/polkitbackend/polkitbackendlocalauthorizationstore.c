@@ -75,7 +75,7 @@ typedef struct
 {
   gchar *id;
 
-  /* Identities with glob support */
+  /* Identities with glob support; NULL entries mean "default identity" */
   GList *identity_specs;
 
   /* Netgroup identity strings, which can not support glob syntax */
@@ -91,10 +91,18 @@ typedef struct
 } LocalAuthorization;
 
 static void
+free_pattern_if_nonnull (gpointer pattern, gpointer user_data)
+{
+  (void)user_data;
+  if (pattern != NULL)
+    g_pattern_spec_free (pattern);
+}
+
+static void
 local_authorization_free (LocalAuthorization *authorization)
 {
   g_free (authorization->id);
-  g_list_foreach (authorization->identity_specs, (GFunc) g_pattern_spec_free, NULL);
+  g_list_foreach (authorization->identity_specs, free_pattern_if_nonnull, NULL);
   g_list_free (authorization->identity_specs);
   g_list_free_full (authorization->netgroup_identities, g_free);
   g_list_foreach (authorization->action_specs, (GFunc) g_pattern_spec_free, NULL);
@@ -142,8 +150,12 @@ local_authorization_new (GKeyFile      *key_file,
     }
   for (n = 0; identity_strings[n] != NULL; n++)
     {
+      /* "default" is a special case that doesn't match PolkitIdentity syntax */
+      if (strcmp (identity_strings[n], "default") == 0)
+        authorization->identity_specs = g_list_prepend (authorization->identity_specs,
+                                                        NULL);
       /* Put netgroup entries in a seperate list from other identities who support glob syntax */
-      if (g_str_has_prefix (identity_strings[n], "unix-netgroup:"))
+      else if (g_str_has_prefix (identity_strings[n], "unix-netgroup:"))
         authorization->netgroup_identities = g_list_prepend (authorization->netgroup_identities,
                                                              g_strdup (identity_strings[n] + sizeof "unix-netgroup:" - 1));
       else
@@ -663,7 +675,7 @@ polkit_backend_local_authorization_store_ensure (PolkitBackendLocalAuthorization
 /**
  * polkit_backend_local_authorization_store_lookup:
  * @store: A #PolkitBackendLocalAuthorizationStore.
- * @identity: The identity to check for.
+ * @identity: The identity to check for, or %NULL for "default".
  * @action_id: The action id to check for.
  * @details: Details for @action.
  * @out_result_any: Return location for the result for any subjects if the look up matched.
@@ -691,7 +703,7 @@ polkit_backend_local_authorization_store_lookup (PolkitBackendLocalAuthorization
   gchar *identity_string;
 
   g_return_val_if_fail (POLKIT_BACKEND_IS_LOCAL_AUTHORIZATION_STORE (store), FALSE);
-  g_return_val_if_fail (POLKIT_IS_IDENTITY (identity), FALSE);
+  g_return_val_if_fail (identity == NULL || POLKIT_IS_IDENTITY (identity), FALSE);
   g_return_val_if_fail (action_id != NULL, FALSE);
   g_return_val_if_fail (POLKIT_IS_DETAILS (details), FALSE);
   g_return_val_if_fail (out_result_any != NULL, FALSE);
@@ -716,29 +728,41 @@ polkit_backend_local_authorization_store_lookup (PolkitBackendLocalAuthorization
       if (ll == NULL)
         continue;
 
-      /* then match the identity against identity specs */
-      if (identity_string == NULL)
-        identity_string = polkit_identity_to_string (identity);
-      for (ll = authorization->identity_specs; ll != NULL; ll = ll->next)
-        {
-          if (g_pattern_match_string ((GPatternSpec *) ll->data, identity_string))
-            break;
-        }
+      if (identity == NULL)
+	{
+	  for (ll = authorization->identity_specs; ll != NULL; ll = ll->next)
+	    {
+	      if (ll->data == NULL)
+		break;
+	    }
+	}
+      else
+	{
+	  /* then match the identity against identity specs */
+	  if (identity_string == NULL)
+	    identity_string = polkit_identity_to_string (identity);
+	  for (ll = authorization->identity_specs; ll != NULL; ll = ll->next)
+	    {
+	      if (ll->data != NULL
+		  && g_pattern_match_string ((GPatternSpec *) ll->data, identity_string))
+		break;
+	    }
 
-      /* if no identity specs matched and identity is a user, match against netgroups */
-      if (ll == NULL && POLKIT_IS_UNIX_USER (identity))
-        {
-          PolkitUnixUser *user_identity = POLKIT_UNIX_USER (identity);
-          const gchar *user_name = polkit_unix_user_get_name (user_identity);
-          if (!user_name)
-            continue;
+	  /* if no identity specs matched and identity is a user, match against netgroups */
+	  if (ll == NULL && POLKIT_IS_UNIX_USER (identity))
+	    {
+	      PolkitUnixUser *user_identity = POLKIT_UNIX_USER (identity);
+	      const gchar *user_name = polkit_unix_user_get_name (user_identity);
+	      if (!user_name)
+		continue;
 
-          for (ll = authorization->netgroup_identities; ll != NULL; ll = ll->next)
-            {
-              if (innetgr ((const gchar *) ll->data, NULL, user_name, NULL))
-                break;
-            }
-        }
+	      for (ll = authorization->netgroup_identities; ll != NULL; ll = ll->next)
+		{
+		  if (innetgr ((const gchar *) ll->data, NULL, user_name, NULL))
+		    break;
+		}
+	    }
+	}
 
       if (ll == NULL)
         continue;
@@ -766,7 +790,8 @@ polkit_backend_local_authorization_store_lookup (PolkitBackendLocalAuthorization
       g_debug ("authorization with id `%s' matched action_id `%s' for identity `%s'",
                authorization->id,
                action_id,
-               polkit_identity_to_string (identity));
+               identity != NULL
+	       ? polkit_identity_to_string (identity) : "default");
 #endif
     }
 
