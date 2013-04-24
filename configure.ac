@@ -206,7 +206,6 @@ AC_CONFIG_FILES([
 Makefile
 src/Makefile
 src/polkitbackend/Makefile
-docs/version.xml
 docs/Makefile
 docs/man/Makefile
 po/Makefile.in
