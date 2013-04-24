@@ -5,9 +5,8 @@ AC_INIT([polkit-pkla-compat], [0.1],
 	[https://fedorahosted.org/polkit-pkla-compat/])
 AC_CONFIG_AUX_DIR([admin])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([])
+AM_INIT_AUTOMAKE([no-dist-gzip dist-xz no-define subdir-objects])
 AC_CONFIG_HEADERS(config.h)
-AM_MAINTAINER_MODE
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
