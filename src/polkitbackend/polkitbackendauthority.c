@@ -31,7 +31,6 @@
 
 #include "polkitbackendauthority.h"
 #include "polkitbackendlocalauthority.h"
-#include "polkitbackendjsauthority.h"
 
 #include "polkitbackendprivate.h"
 
@@ -1346,37 +1345,6 @@ polkit_backend_authority_register (PolkitBackendAuthority   *authority,
   return NULL;
 }
 
-
-/**
- * polkit_backend_authority_get:
- *
- * Gets the #PolkitBackendAuthority to use.
- *
- * Returns: A #PolkitBackendAuthority. Free with g_object_unref().
- */
-PolkitBackendAuthority *
-polkit_backend_authority_get (void)
-{
-  PolkitBackendAuthority *authority;
-
-  /* TODO: move to polkitd/main.c */
-
-  /* Announce that we've started in the generic log */
-  openlog ("polkitd",
-           LOG_PID,
-           LOG_DAEMON);  /* system daemons without separate facility value */
-  syslog (LOG_INFO, "Started polkitd version %s", VERSION);
-  closelog ();
-
-  /* then start logging to the secure log */
-  openlog ("polkitd",
-           LOG_PID,
-           LOG_AUTHPRIV); /* security/authorization messages (private) */
-
-  authority = POLKIT_BACKEND_AUTHORITY (g_object_new (POLKIT_BACKEND_TYPE_JS_AUTHORITY, NULL));
-
-  return authority;
-}
 
 /* ---------------------------------------------------------------------------------------------------- */
 

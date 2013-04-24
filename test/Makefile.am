@@ -1,5 +1,5 @@
 
-SUBDIRS = mocklibc . polkit polkitbackend
+SUBDIRS = mocklibc . polkitbackend
 AM_CFLAGS = $(GLIB_CFLAGS)
 
 noinst_LTLIBRARIES = libpolkit-test-helper.la

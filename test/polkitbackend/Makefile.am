@@ -20,11 +20,12 @@ AM_CFLAGS =							\
         -D_POLKIT_COMPILATION                                   \
         -D_POLKIT_BACKEND_COMPILATION                           \
 	$(GLIB_CFLAGS)						\
+	$(POLKIT_CFLAGS)					\
 	$(NULL)
 
 LDADD =  	                      				\
 	$(GLIB_LIBS)						\
-	$(top_builddir)/src/polkit/libpolkit-gobject-1.la	\
+	$(POLKIT_LIBS)						\
 	$(top_builddir)/src/polkitbackend/libpolkit-backend-1.la\
 	$(top_builddir)/test/libpolkit-test-helper.la           \
 	$(NULL)
@@ -38,9 +39,6 @@ polkitbackendlocalauthorizationstoretest_SOURCES = polkitbackendlocalauthorizati
 
 TEST_PROGS += polkitbackendlocalauthoritytest
 polkitbackendlocalauthoritytest_SOURCES = polkitbackendlocalauthoritytest.c
-
-TEST_PROGS += polkitbackendjsauthoritytest
-polkitbackendjsauthoritytest_SOURCES = test-polkitbackendjsauthority.c
 
 # ----------------------------------------------------------------------------------------------------
 

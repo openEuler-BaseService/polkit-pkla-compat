@@ -29,8 +29,6 @@ pkla_check_authorization_LDADD =                                      	\
         $(GLIB_LIBS)							\
         $(NULL)
 
-BUILT_SOURCES =
-
 INCLUDES =                                                      \
         -I$(top_builddir)/src                                   \
         -I$(top_srcdir)/src                                     \
@@ -49,11 +47,6 @@ INCLUDES =                                                      \
 
 noinst_LTLIBRARIES=libpolkit-backend-1.la
 
-initjs.h : init.js
-	$(PERL) $(srcdir)/toarray.pl $(srcdir)/init.js init_js > $@
-
-BUILT_SOURCES += initjs.h
-
 libpolkit_backend_1_la_SOURCES =                                   			\
 	$(BUILT_SOURCES)								\
         polkitbackend.h									\
@@ -62,7 +55,6 @@ libpolkit_backend_1_la_SOURCES =                                   			\
 	polkitbackendauthority.h		polkitbackendauthority.c		\
 	polkitbackendinteractiveauthority.h	polkitbackendinteractiveauthority.c	\
 	polkitbackendlocalauthority.h		polkitbackendlocalauthority.c		\
-	polkitbackendjsauthority.h		polkitbackendjsauthority.c		\
 	polkitbackendactionpool.h		polkitbackendactionpool.c		\
 	polkitbackendconfigsource.h		polkitbackendconfigsource.c		\
 	polkitbackendactionlookup.h		polkitbackendactionlookup.c		\
@@ -82,15 +74,13 @@ libpolkit_backend_1_la_CFLAGS =                                        	\
         -D_POLKIT_BACKEND_COMPILATION                                  	\
         $(GLIB_CFLAGS)							\
 	$(LIBSYSTEMD_LOGIN_CFLAGS)					\
-	$(LIBJS_CFLAGS)							\
+	$(POLKIT_CFLAGS)
         $(NULL)
 
-# Note: We don't include $(LIBJS_LIBS) here since it's dlopen()'ed in polkitbackendjsauthority.c
-#
 libpolkit_backend_1_la_LIBADD =                               		\
         $(GLIB_LIBS)							\
 	$(LIBSYSTEMD_LOGIN_LIBS)					\
-	$(top_builddir)/src/polkit/libpolkit-gobject-1.la		\
+	$(POLKIT_LIBS)							\
 	$(EXPAT_LIBS)							\
         $(NULL)
 
@@ -99,45 +89,14 @@ rules_DATA = 50-pkla.rules
 
 # ----------------------------------------------------------------------------------------------------
 
-libprivdir = $(prefix)/lib/polkit-1
-libpriv_PROGRAMS = polkitd
-
-polkitd_SOURCES = 							\
-					polkitd.c			\
-	$(NULL)
-
-polkitd_CFLAGS = 							\
-	-DPOLKIT_BACKEND_I_KNOW_API_IS_SUBJECT_TO_CHANGE		\
-	-DG_LOG_DOMAIN=\"polkitd-1\"					\
-	$(GLIB_CFLAGS)							\
-	$(NULL)
-
-polkitd_LDADD = 				        		\
-	$(GLIB_LIBS)							\
-	$(top_builddir)/src/polkit/libpolkit-gobject-1.la		\
-	libpolkit-backend-1.la						\
-	$(NULL)
-
-# ----------------------------------------------------------------------------------------------------
-
-
-CLEANFILES = $(BUILT_SOURCES)
-
 localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
 localauthorityconfig_DATA = 50-localauthority.conf
 
 EXTRA_DIST =								\
 	$(localauthorityconfig_DATA)					\
-	init.js								\
 	toarray.pl							\
 	$(rules_DATA)							\
 	$(NULL)
-
-dist-hook :
-	(for i in $(BUILT_SOURCES) ; do rm -f $(distdir)/$$i ; done)
-
-clean-local :
-	rm -f *~ $(BUILT_SOURCES)
 
 install-data-hook:
 	mkdir -p $(DESTDIR)$(localstatedir)/lib/polkit-1

@@ -270,8 +270,6 @@ gboolean polkit_backend_authority_revoke_temporary_authorization_by_id (PolkitBa
 
 /* --- */
 
-PolkitBackendAuthority *polkit_backend_authority_get (void);
-
 gpointer polkit_backend_authority_register (PolkitBackendAuthority   *authority,
                                             GDBusConnection          *connection,
                                             const gchar              *object_path,

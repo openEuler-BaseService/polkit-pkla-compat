@@ -1,9 +1,5 @@
 
-SUBDIRS = polkit polkitbackend polkitagent programs
-
-if BUILD_EXAMPLES
-SUBDIRS += examples
-endif
+SUBDIRS = polkitbackend
 
 clean-local :
 	rm -f *~

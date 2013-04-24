@@ -34,14 +34,6 @@ touch ChangeLog
   }
 }
 
-(gtkdocize --flavour no-tmpl) < /dev/null > /dev/null 2>&1 || {
-	echo
-	echo "You must have gtk-doc installed to compile $PROJECT."
-	echo "Install the appropriate package for your distribution,"
-	echo "or get the source tarball at http://ftp.gnome.org/pub/GNOME/sources/gtk-doc/"
-	DIE=1
-}
-
 (automake --version) < /dev/null > /dev/null 2>&1 || {
   echo
   echo "**Error**: You must have automake installed."
@@ -112,7 +104,7 @@ intltoolize --copy --force --automake                  || exit 1
 
 cd "$olddir"
 
-conf_flags="--enable-maintainer-mode --enable-gtk-doc"
+conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
   echo "Running $srcdir/configure $conf_flags $@ ..."
