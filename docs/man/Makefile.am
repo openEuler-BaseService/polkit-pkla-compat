@@ -1,16 +1,12 @@
 
 NULL =
 
-if MAN_PAGES_ENABLED
-
 man_MANS = 				\
 	pklocalauthority.8		\
 	$(NULL)
 
 %.8 %.1 : %.xml
 	$(XSLTPROC) -nonet --xinclude http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
-
-endif # MAN_PAGES_ENABLED
 
 EXTRA_DIST = 				\
 	pklocalauthority.xml		\

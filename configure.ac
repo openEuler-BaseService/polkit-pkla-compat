@@ -20,18 +20,14 @@ AM_PROG_CC_C_O
 
 # Taken from dbus
 AC_ARG_ENABLE(ansi,             [  --enable-ansi           enable -ansi -pedantic gcc flags],enable_ansi=$enableval,enable_ansi=no)
-AC_ARG_ENABLE(man-pages,        [  --enable-man-pages      build manual pages],enable_man_pages=$enableval,enable_man_pages=yes)
 
-if test "${enable_man_page}" != no; then
 dnl
 dnl Check for xsltproc
 dnl
 AC_PATH_PROG([XSLTPROC], [xsltproc])
-  if test -z "$XSLTPROC"; then
-    enable_man_pages=no
-  fi
+if test -z "$XSLTPROC"; then
+   AC_MSG_ERROR([cannot find xsltproc])
 fi
-AM_CONDITIONAL(MAN_PAGES_ENABLED, test x$enable_man_pages = xyes)
 
 #### gcc warning flags
 
@@ -240,7 +236,7 @@ echo "
         Session tracking:           ${SESSION_TRACKING}
         polkitd user:               ${POLKITD_USER}"
 echo "
-        Building man pages:         ${enable_man_pages}
+
 
 "
 
