@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = src docs po test
+SUBDIRS = src/polkitbackend docs/man po test
 
 NULL =
 
