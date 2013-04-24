@@ -1,27 +1,12 @@
-OVERVIEW
-========
+About
+=====
+polkit-pkla-compat is a polkit JavaScript rule and associated helpers
+that mostly provide compatibility with the .pkla file format supported in
+polkit <= 0.105 for users of later polkit releases.
 
-polkit is a toolkit for defining and handling authorizations.  It is
-used for allowing unprivileged processes to speak to privileged
-processes.
+Bugs
+====
+Please consider reporting the bug to your distribution's bug tracking system.
 
-RELEASES
-========
-
-Releases of polkit are available in compressed tarballs from
-
- http://www.freedesktop.org/software/polkit/releases/
-
-To verify the authenticity of the compressed tarball, use this command
-
- $ gpg --verify polkit-$(VERSION).tar.gz.sign polkit-$(VERSION).tar.gz
- gpg: Signature made Sat 10 Mar 2012 03:00:30 PM EST using RSA key ID 3418A891
- gpg: Good signature from "David Zeuthen <zeuthen@gmail.com>"
- gpg:                 aka "[jpeg image of size 5237]"
-
-BUGS and DEVELOPMENT
-====================
-
-Please report bugs via the freedesktop.org bugzilla at
-
- https://bugs.freedesktop.org/enter_bug.cgi?product=PolicyKit
+Otherwise, report bugs at https://fedorahosted.org/polkit-pkla-compat/ .
+Bug reports with patches are especially welcome.
