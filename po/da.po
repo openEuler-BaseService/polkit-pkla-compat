@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: DeviceKit-disks\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-03 13:03-0500\n"
+"Report-Msgid-Bugs-To: https://fedorahosted.org/polkit-pkla-compat/\n"
+"POT-Creation-Date: 2013-04-24 23:00+0200\n"
 "PO-Revision-Date: 2011-03-03 13:05-0500\n"
 "Last-Translator: David Zeuthen <davidz@redhat.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
@@ -18,48 +18,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../actions/org.freedesktop.policykit.policy.in.h:1
-msgid "Authentication is required to configure lock down policy"
-msgstr "Autorisering er påkrævet for at konfigurer lock down"
+#: src/polkitbackend/pkla-admin-identities.c:91
+msgid "Use configuration files in DIR"
+msgstr ""
 
-#: ../actions/org.freedesktop.policykit.policy.in.h:2
-msgid "Authentication is required to run a program as another user"
-msgstr "Autorisering er påkrævet for at afvikle et program som en anden bruger"
+#: src/polkitbackend/pkla-admin-identities.c:91
+msgid "DIR"
+msgstr ""
 
-#: ../actions/org.freedesktop.policykit.policy.in.h:3
-msgid "Configure lock down for an action"
-msgstr "Konfigurer lock down for en action"
+#: src/polkitbackend/pkla-admin-identities.c:109
+msgid "Interprets pklocalauthority(8) configuration files."
+msgstr ""
 
-#: ../actions/org.freedesktop.policykit.policy.in.h:4
-msgid "Run programs as another user"
-msgstr "Kør et program som en anden bruger"
-
-#: ../src/examples/org.freedesktop.policykit.examples.pkexec.policy.in.h:1
+#: src/polkitbackend/pkla-admin-identities.c:115
+#, c-format
 msgid ""
-"Authentication is required to run the PolicyKit example program Frobnicate "
-"(user=$(user), program=$(program), command_line=$(command_line))"
+"%s: %s\n"
+"Run `%s --help' for more information.\n"
 msgstr ""
-"Autorisering er påkrævet for at afvikle PolicyKit eksemplet Frobnicate (user="
-"$(user), program=$(program), command_line=$(command_line))"
 
-#: ../src/examples/org.freedesktop.policykit.examples.pkexec.policy.in.h:2
-msgid "Run the PolicyKit example program Frobnicate"
-msgstr "Kør PolicyKit eksemplet Frobnicate"
-
-#. Translators: message shown when trying to run a program as root. Do not
-#. * translate the $(program) fragment - it will be expanded to the path
-#. * of the program e.g.  /bin/bash.
-#.
-#: ../src/programs/pkexec.c:666
-msgid "Authentication is needed to run `$(program)' as the super user"
-msgstr "Autorisering er påkrævet for at afvikle `$(program)' som super bruger"
-
-#. Translators: message shown when trying to run a program as another user.
-#. * Do not translate the $(program) or $(user) fragments - the former will
-#. * be expanded to the path of the program e.g. "/bin/bash" and the latter
-#. * to the user e.g. "John Doe (johndoe)" or "johndoe".
-#.
-#: ../src/programs/pkexec.c:676
-msgid "Authentication is needed to run `$(program)' as user $(user)"
+#: src/polkitbackend/pkla-admin-identities.c:125
+#, c-format
+msgid ""
+"Unexpected argument\n"
+"Run `%s --help' for more information.\n"
 msgstr ""
-"Autorisering er påkrævet for at afvikle `$(program)' som bruger $(user)"
+
+#: src/polkitbackend/pkla-check-authorization.c:357
+msgid "Invalid boolean value"
+msgstr ""
+
+#~ msgid "Authentication is required to configure lock down policy"
+#~ msgstr "Autorisering er påkrævet for at konfigurer lock down"
+
+#~ msgid "Authentication is required to run a program as another user"
+#~ msgstr ""
+#~ "Autorisering er påkrævet for at afvikle et program som en anden bruger"
+
+#~ msgid "Configure lock down for an action"
+#~ msgstr "Konfigurer lock down for en action"
+
+#~ msgid "Run programs as another user"
+#~ msgstr "Kør et program som en anden bruger"
+
+#~ msgid ""
+#~ "Authentication is required to run the PolicyKit example program "
+#~ "Frobnicate (user=$(user), program=$(program), command_line="
+#~ "$(command_line))"
+#~ msgstr ""
+#~ "Autorisering er påkrævet for at afvikle PolicyKit eksemplet Frobnicate "
+#~ "(user=$(user), program=$(program), command_line=$(command_line))"
+
+#~ msgid "Run the PolicyKit example program Frobnicate"
+#~ msgstr "Kør PolicyKit eksemplet Frobnicate"
+
+#~ msgid "Authentication is needed to run `$(program)' as the super user"
+#~ msgstr ""
+#~ "Autorisering er påkrævet for at afvikle `$(program)' som super bruger"
+
+#~ msgid "Authentication is needed to run `$(program)' as user $(user)"
+#~ msgstr ""
+#~ "Autorisering er påkrævet for at afvikle `$(program)' som bruger $(user)"
