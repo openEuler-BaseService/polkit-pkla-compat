@@ -94,7 +94,6 @@ localauthorityconfig_DATA = 50-localauthority.conf
 
 EXTRA_DIST =								\
 	$(localauthorityconfig_DATA)					\
-	toarray.pl							\
 	$(rules_DATA)							\
 	$(NULL)
 
