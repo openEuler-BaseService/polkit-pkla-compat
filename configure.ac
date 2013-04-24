@@ -3,6 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59c)
 AC_INIT([polkit-pkla-compat], [0.1],
 	[https://fedorahosted.org/polkit-pkla-compat/])
+AC_CONFIG_AUX_DIR([admin])
 AM_INIT_AUTOMAKE([])
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE

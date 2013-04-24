@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([MockLibc], [1.1], [vonhollen@google.com])
+AC_CONFIG_AUX_DIR([../../admin])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
