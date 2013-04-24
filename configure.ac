@@ -4,6 +4,7 @@ AC_PREREQ(2.59c)
 AC_INIT([polkit-pkla-compat], [0.1],
 	[https://fedorahosted.org/polkit-pkla-compat/])
 AC_CONFIG_AUX_DIR([admin])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([])
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
@@ -24,7 +25,6 @@ AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
-AC_ISC_POSIX
 AC_PROG_CC
 AC_HEADER_STDC
 AM_PROG_LIBTOOL
@@ -228,7 +228,7 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.18.1])
 AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE],["$GETTEXT_PACKAGE"],[gettext domain])
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 src/Makefile
 src/polkitbackend/Makefile
@@ -239,6 +239,7 @@ po/Makefile.in
 test/Makefile
 test/polkitbackend/Makefile
 ])
+AC_OUTPUT
 
 dnl ==========================================================================
 echo "
