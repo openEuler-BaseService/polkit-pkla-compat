@@ -19,6 +19,7 @@
  * Author: Nikki VonHollen <vonhollen@google.com>
  */
 
+#include "config.h"
 #include "glib.h"
 
 #include <polkittesthelper.h>
