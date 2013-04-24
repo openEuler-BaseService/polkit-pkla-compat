@@ -85,17 +85,12 @@ libpolkit_backend_1_la_LIBADD =                               		\
         $(NULL)
 
 rulesdir = $(sysconfdir)/polkit-1/rules.d
-rules_DATA = 50-pkla.rules
+dist_rules_DATA = 50-pkla.rules
 
 # ----------------------------------------------------------------------------------------------------
 
 localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
-localauthorityconfig_DATA = 50-localauthority.conf
-
-EXTRA_DIST =								\
-	$(localauthorityconfig_DATA)					\
-	$(rules_DATA)							\
-	$(NULL)
+dist_localauthorityconfig_DATA = 50-localauthority.conf
 
 install-data-hook:
 	mkdir -p $(DESTDIR)$(localstatedir)/lib/polkit-1
