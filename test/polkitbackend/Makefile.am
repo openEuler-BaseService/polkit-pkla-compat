@@ -45,6 +45,3 @@ polkitbackendlocalauthoritytest_SOURCES = polkitbackendlocalauthoritytest.c
 noinst_PROGRAMS = $(TEST_PROGS)
 check_PROGRAMS = $(TEST_PROGS)
 TESTS = $(TEST_PROGS)
-
-clean-local :
-	rm -f *~

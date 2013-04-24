@@ -2,6 +2,3 @@
 
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src/polkitbackend docs/man po test
-
-clean-local :
-	rm -f *~

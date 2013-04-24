@@ -17,9 +17,6 @@ export TESTS_ENVIRONMENT := $(abs_top_builddir)/test/mocklibc/bin/mocklibc
 # Include path to mock config files
 export POLKIT_TEST_DATA := $(abs_top_srcdir)/test/data
 
-clean-local :
-	rm -f *~
-
 
 # Never install anything in this dir (specifically MockLibc)
 install:; @:

@@ -12,5 +12,4 @@ EXTRA_DIST = 				\
 	pklocalauthority.xml		\
 	$(NULL)
 
-clean-local:
-	rm -f *~ *.1 *.8
+CLEANFILES = $(man_MANS)
