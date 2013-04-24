@@ -25,7 +25,7 @@
 #include <string.h>
 #include <glib/gstdio.h>
 #include <locale.h>
-#include <glib/gi18n-lib.h>
+#include <glib/gi18n.h>
 #include <polkit/polkit.h>
 
 #include "polkitbackendconfigsource.h"

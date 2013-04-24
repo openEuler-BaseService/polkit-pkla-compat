@@ -13,22 +13,8 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Include external mocklibc tool for unit testing
 AC_CONFIG_SUBDIRS([test/mocklibc])
 
-# libtool versioning - this applies to all libraries in this package
-#
-# See http://sources.redhat.com/autobook/autobook/autobook_91.html#SEC91 for details
-#
-LT_CURRENT=0
-LT_REVISION=0
-LT_AGE=0
-AC_SUBST(LT_CURRENT)
-AC_SUBST(LT_REVISION)
-AC_SUBST(LT_AGE)
-
 AC_PROG_CC
-AC_HEADER_STDC
 AM_PROG_LIBTOOL
-AC_PROG_MAKE_SET
-AC_PROG_LN_S
 AC_SYS_LARGEFILE
 AM_PROG_CC_C_O
 
@@ -132,7 +118,6 @@ PKG_CHECK_MODULES([POLKIT], [polkit-gobject-1])
 AC_SUBST([POLKIT_CFLAGS])
 AC_SUBST([POLKIT_LIBS])
 
-EXPAT_LIB=""
 AC_ARG_WITH(expat, [  --with-expat=<dir>      Use expat from here],
                       [
                       expat=$withval
@@ -140,13 +125,11 @@ AC_ARG_WITH(expat, [  --with-expat=<dir>      Use expat from here],
                       LDFLAGS="$LDFLAGS -L$withval/lib"
                       ]
                       )
-AC_CHECK_HEADERS(expat.h, [AC_DEFINE(HAVE_EXPAT_H)], 
+AC_CHECK_HEADERS([expat.h], ,
 		 [AC_MSG_ERROR([Can't find expat.h. Please install expat.])])
-AC_CHECK_LIB(expat,XML_ParserCreate,[EXPAT_LIBS="-lexpat"],
+AC_CHECK_LIB([expat], [XML_ParserCreate], [true],
 	     [AC_MSG_ERROR([Can't find expat library. Please install expat.])])
-AC_SUBST(EXPAT_LIBS)
-
-AC_CHECK_FUNCS(clearenv)
+AC_SUBST([EXPAT_LIBS], [-lexpat])
 
 if test "x$GCC" = "xyes"; then
   LDFLAGS="-Wl,--as-needed $LDFLAGS"
@@ -214,18 +197,14 @@ else
     POLKITD_USER=$with_polkitd_user
 fi
 AC_SUBST(POLKITD_USER)
-AC_DEFINE_UNQUOTED(POLKITD_USER,"$POLKITD_USER", [User for running polkitd])
 
 
 # ********************
 # Internationalization
 # ********************
 
-GETTEXT_PACKAGE=polkit-1
-AC_SUBST([GETTEXT_PACKAGE])
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.18.1])
-AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE],["$GETTEXT_PACKAGE"],[gettext domain])
 
 AC_CONFIG_FILES([
 Makefile
@@ -261,19 +240,9 @@ echo "
         Session tracking:           ${SESSION_TRACKING}
         polkitd user:               ${POLKITD_USER}"
 echo "
-        Maintainer mode:            ${USE_MAINTAINER_MODE}
         Building man pages:         ${enable_man_pages}
-        Building examples:          ${enable_examples}
 
 "
-
-echo "NOTE: The file ${prefix}/lib/polkit-1/polkit-agent-helper-1 must be owned"
-echo "      by root and have mode 4755 (setuid root binary)"
-echo
-
-echo "NOTE: The file ${bindir}/pkexec must be owned by root and"
-echo "      have mode 4755 (setuid root binary)"
-echo
 
 echo "NOTE: The directory ${sysconfdir}/polkit-1/rules.d must be owned"
 echo "      by user '$POLKITD_USER' and have mode 700"
