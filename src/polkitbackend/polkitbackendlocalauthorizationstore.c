@@ -256,7 +256,7 @@ local_authorization_new (GKeyFile      *key_file,
                                                      group,
                                                      "ReturnValue",
                                                      NULL,
-                                                     error);
+                                                     NULL);
   if (return_value_strings != NULL)
     {
       for (n = 0; return_value_strings[n] != NULL; n++)
@@ -292,7 +292,7 @@ local_authorization_new (GKeyFile      *key_file,
 
  out:
   g_strfreev (identity_strings);
-  g_free (action_strings);
+  g_strfreev (action_strings);
   g_free (result_any_string);
   g_free (result_inactive_string);
   g_free (result_active_string);
