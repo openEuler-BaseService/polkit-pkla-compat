@@ -205,6 +205,44 @@ polkit_backend_local_authority_set_auth_store_paths (PolkitBackendLocalAuthority
 
 /* ---------------------------------------------------------------------------------------------------- */
 
+static void
+update_ret_from_authorization_store (PolkitBackendLocalAuthorityPrivate *priv,
+				     PolkitImplicitAuthorization *ret,
+				     PolkitIdentity *identity,
+				     gboolean subject_is_local,
+				     gboolean subject_is_active,
+				     const gchar *action_id,
+				     PolkitDetails *details)
+{
+  GList *l;
+
+  for (l = priv->authorization_stores; l != NULL; l = l->next)
+    {
+      PolkitBackendLocalAuthorizationStore *store = POLKIT_BACKEND_LOCAL_AUTHORIZATION_STORE (l->data);
+      PolkitImplicitAuthorization ret_any;
+      PolkitImplicitAuthorization ret_inactive;
+      PolkitImplicitAuthorization ret_active;
+
+      if (polkit_backend_local_authorization_store_lookup (store, identity,
+							   action_id, details,
+							   &ret_any,
+							   &ret_inactive,
+							   &ret_active))
+	{
+	  PolkitImplicitAuthorization relevant_ret;
+
+	  if (subject_is_local && subject_is_active)
+	    relevant_ret = ret_active;
+	  else if (subject_is_local)
+	    relevant_ret = ret_inactive;
+	  else
+	    relevant_ret = ret_any;
+	  if (relevant_ret != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
+	    *ret = relevant_ret;
+	}
+    }
+}
+
 static PolkitImplicitAuthorization
 polkit_backend_local_authority_check_authorization_sync (PolkitBackendLocalAuthorityPrivate *priv,
                                                          PolkitIdentity                    *user_for_subject,
@@ -214,11 +252,8 @@ polkit_backend_local_authority_check_authorization_sync (PolkitBackendLocalAutho
                                                          PolkitDetails                     *details)
 {
   PolkitImplicitAuthorization ret;
-  PolkitImplicitAuthorization ret_any;
-  PolkitImplicitAuthorization ret_inactive;
-  PolkitImplicitAuthorization ret_active;
   GList *groups;
-  GList *l, *ll;
+  GList *ll;
 
   ret = POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN;
 
@@ -235,69 +270,17 @@ polkit_backend_local_authority_check_authorization_sync (PolkitBackendLocalAutho
     {
       PolkitIdentity *group = POLKIT_IDENTITY (ll->data);
 
-      for (l = priv->authorization_stores; l != NULL; l = l->next)
-        {
-          PolkitBackendLocalAuthorizationStore *store = POLKIT_BACKEND_LOCAL_AUTHORIZATION_STORE (l->data);
-
-          if (polkit_backend_local_authorization_store_lookup (store,
-                                                               group,
-                                                               action_id,
-                                                               details,
-                                                               &ret_any,
-                                                               &ret_inactive,
-                                                               &ret_active))
-            {
-              if (subject_is_local && subject_is_active)
-                {
-                  if (ret_active != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                    ret = ret_active;
-                }
-              else if (subject_is_local)
-                {
-                  if (ret_inactive != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                    ret = ret_inactive;
-                }
-              else
-                {
-                  if (ret_any != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                    ret = ret_any;
-                }
-            }
-        }
+      update_ret_from_authorization_store (priv, &ret, group,
+					   subject_is_local, subject_is_active,
+					   action_id, details);
     }
   g_list_foreach (groups, (GFunc) g_object_unref, NULL);
   g_list_free (groups);
 
   /* Then do it for the user */
-  for (l = priv->authorization_stores; l != NULL; l = l->next)
-    {
-      PolkitBackendLocalAuthorizationStore *store = POLKIT_BACKEND_LOCAL_AUTHORIZATION_STORE (l->data);
-
-      if (polkit_backend_local_authorization_store_lookup (store,
-                                                           user_for_subject,
-                                                           action_id,
-                                                           details,
-                                                           &ret_any,
-                                                           &ret_inactive,
-                                                           &ret_active))
-        {
-          if (subject_is_local && subject_is_active)
-            {
-              if (ret_active != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                ret = ret_active;
-            }
-          else if (subject_is_local)
-            {
-              if (ret_inactive != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                ret = ret_inactive;
-            }
-          else
-            {
-              if (ret_any != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
-                ret = ret_any;
-            }
-        }
-    }
+  update_ret_from_authorization_store (priv, &ret, user_for_subject,
+				       subject_is_local, subject_is_active,
+				       action_id, details);
 
   return ret;
 }
