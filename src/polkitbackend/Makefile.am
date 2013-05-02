@@ -39,8 +39,6 @@ AM_CPPFLAGS =                                                   \
 noinst_LTLIBRARIES=libpolkit-backend-1.la
 
 libpolkit_backend_1_la_SOURCES =                                   			\
-	$(BUILT_SOURCES)								\
-	polkitbackendconfigsource.h		polkitbackendconfigsource.c		\
 	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
         $(NULL)
 
