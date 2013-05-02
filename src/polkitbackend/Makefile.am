@@ -49,37 +49,19 @@ noinst_LTLIBRARIES=libpolkit-backend-1.la
 
 libpolkit_backend_1_la_SOURCES =                                   			\
 	$(BUILT_SOURCES)								\
-        polkitbackend.h									\
-	polkitbackendtypes.h								\
-	polkitbackendprivate.h								\
-	polkitbackendauthority.h		polkitbackendauthority.c		\
-	polkitbackendinteractiveauthority.h	polkitbackendinteractiveauthority.c	\
-	polkitbackendlocalauthority.h		polkitbackendlocalauthority.c		\
-	polkitbackendactionpool.h		polkitbackendactionpool.c		\
 	polkitbackendconfigsource.h		polkitbackendconfigsource.c		\
-	polkitbackendactionlookup.h		polkitbackendactionlookup.c		\
 	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
         $(NULL)
-
-if HAVE_LIBSYSTEMD_LOGIN
-libpolkit_backend_1_la_SOURCES += \
-	polkitbackendsessionmonitor.h		polkitbackendsessionmonitor-systemd.c
-else
-libpolkit_backend_1_la_SOURCES += \
-	polkitbackendsessionmonitor.h		polkitbackendsessionmonitor.c
-endif
 
 libpolkit_backend_1_la_CFLAGS =                                        	\
         -D_POLKIT_COMPILATION                                  		\
         -D_POLKIT_BACKEND_COMPILATION                                  	\
         $(GLIB_CFLAGS)							\
-	$(LIBSYSTEMD_LOGIN_CFLAGS)					\
 	$(POLKIT_CFLAGS)
         $(NULL)
 
 libpolkit_backend_1_la_LIBADD =                               		\
         $(GLIB_LIBS)							\
-	$(LIBSYSTEMD_LOGIN_LIBS)					\
 	$(POLKIT_LIBS)							\
 	$(EXPAT_LIBS)							\
         $(NULL)

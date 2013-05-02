@@ -2,4 +2,3 @@
 # Please keep this file sorted alphabetically.
 src/polkitbackend/pkla-admin-identities.c
 src/polkitbackend/pkla-check-authorization.c
-src/polkitbackend/polkitbackendlocalauthority.c
