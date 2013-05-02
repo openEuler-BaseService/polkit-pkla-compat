@@ -97,7 +97,7 @@ static void
 test_get_admin_identities (void)
 {
   gchar *config_path, *argv[4], *stdout_, *stderr_;
-  int status;
+  gint status;
   GError *error;
   gboolean ok;
 
