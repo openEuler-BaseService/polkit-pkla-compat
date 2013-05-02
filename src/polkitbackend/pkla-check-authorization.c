@@ -24,6 +24,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <netdb.h>
+#include <stdlib.h>
 #include <string.h>
 #include <glib/gstdio.h>
 #include <locale.h>
@@ -358,10 +359,23 @@ parse_boolean (const char *arg, GError **error)
   return FALSE;
 }
 
+static gchar *auth_paths; /* = NULL; */
+
+/* Use G_OPTION_ARG_FILENAME for all strings to avoid the conversion to
+   UTF-8. */
+static const GOptionEntry opt_entries[] =
+  {
+    { "paths", 'p', 0, G_OPTION_ARG_FILENAME, &auth_paths,
+      N_("Use authorization 'top' directories in ;-separated PATH"), N_("PATH"),
+    },
+    { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+  };
+
 int
 main (int argc, char *argv[])
 {
   GError *error;
+  GOptionContext *opt_context;
   PolkitBackendLocalAuthorityPrivate priv;
   PolkitIdentity *user_for_subject;
   gboolean subject_is_local, subject_is_active;
@@ -370,26 +384,66 @@ main (int argc, char *argv[])
 
   g_type_init ();
 
+  opt_context = g_option_context_new ("USER LOCAL? ACTIVE? ACTION");
+  g_option_context_set_summary (opt_context,
+				N_("Interprets pklocalauthority(8) "
+				   "authorization files."));
+  g_option_context_add_main_entries (opt_context, opt_entries, PACKAGE_NAME);
+  error = NULL;
+  if (!g_option_context_parse (opt_context, &argc, &argv, &error))
+    {
+      fprintf (stderr, _("%s: %s\n"
+			 "Run `%s --help' for more information.\n"),
+	       g_get_prgname (), error->message, g_get_prgname ());
+      g_error_free (error);
+      g_option_context_free (opt_context);
+      goto error;
+    }
+  g_option_context_free (opt_context);
+  if (argc != 5)
+    {
+      fprintf (stderr, _("%s: unexpected number of arguments\n"
+			 "Run `%s --help' for more information.\n"),
+	       g_get_prgname (), g_get_prgname ());
+      goto error;
+    }
+
+  if (auth_paths == NULL)
+    auth_paths = g_strdup (PACKAGE_LOCALSTATE_DIR "/lib/polkit-1/localauthority;"
+			   PACKAGE_SYSCONF_DIR "/polkit-1/localauthority");
+  g_debug ("Using authorization directory paths `%s'", auth_paths);
+
   memset (&priv, 0, sizeof (priv));
   polkit_backend_local_authority_init (&priv);
   /* "Local Authorization Store Paths",
      "Semi-colon separated list of Authorization Store 'top' directories." */
-  polkit_backend_local_authority_set_auth_store_paths (&priv,
-						       PACKAGE_LOCALSTATE_DIR "/lib/polkit-1/localauthority;"
-						       PACKAGE_SYSCONF_DIR "/polkit-1/localauthority");
+  polkit_backend_local_authority_set_auth_store_paths (&priv, auth_paths);
   polkit_backend_local_authority_constructed (&priv);
 
-  g_assert (argc == 5);
-  error = NULL;
   user_for_subject = polkit_unix_user_new_for_name(argv[1], &error);
   if (user_for_subject == NULL)
-    g_assert_not_reached(); /* FIXME */
-  subject_is_local = parse_boolean(argv[2], &error);
+    {
+      fprintf (stderr, _("%s: Invalid user `%s': %s\n"), g_get_prgname(),
+	       argv[1], error->message);
+      g_error_free (error);
+      goto error_priv;
+    }
+  subject_is_local = parse_boolean (argv[2], &error);
   if (error != NULL)
-    g_assert_not_reached(); /* FIXME */
+    {
+      fprintf (stderr, _("%s: Invalid boolean `%s': %s\n"), g_get_prgname(),
+	       argv[2], error->message);
+      g_error_free (error);
+      goto error_priv;
+    }
   subject_is_active = parse_boolean(argv[3], &error);
   if (error != NULL)
-    g_assert_not_reached(); /* FIXME */
+    {
+      fprintf (stderr, _("%s: Invalid boolean `%s': %s\n"), g_get_prgname(),
+	       argv[3], error->message);
+      g_error_free (error);
+      goto error_priv;
+    }
 
   /* polkitlocalauthority used to be able to change details, but that is no
      longer supported in the JS authority, and was not apparently used
@@ -406,4 +460,10 @@ main (int argc, char *argv[])
     printf ("%s\n", polkit_implicit_authorization_to_string (result));
 
   return 0;
+
+ error_priv:
+  polkit_backend_local_authority_finalize (&priv);
+ error:
+  g_free (auth_paths);
+  return EXIT_FAILURE;
 }
