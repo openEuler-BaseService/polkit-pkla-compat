@@ -264,7 +264,12 @@ polkit_backend_local_authority_check_authorization_sync (PolkitBackendLocalAutho
            polkit_identity_to_string (user_for_subject));
 #endif
 
-  /* First lookup for all groups the user belong to */
+  /* First check for default entries */
+  update_ret_from_authorization_store (priv, &ret, NULL,
+				       subject_is_local, subject_is_active,
+				       action_id, details);
+
+  /* Then lookup for all groups the user belong to */
   groups = get_groups_for_user (user_for_subject);
   for (ll = groups; ll != NULL; ll = ll->next)
     {
