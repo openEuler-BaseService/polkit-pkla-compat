@@ -30,6 +30,7 @@
 
 #define BUILD_UTILITIES_DIR "../../src/polkitbackend"
 #define PKLA_ADMIN_IDENTITIES_PATH BUILD_UTILITIES_DIR "/pkla-admin-identities"
+#define PKLA_CHECK_AUTHORIZATION_PATH BUILD_UTILITIES_DIR "/pkla-check-authorization"
 #define TEST_CONFIG_PATH "etc/polkit-1/localauthority.conf.d"
 #define TEST_AUTH_PATH1 "etc/polkit-1/localauthority"
 #define TEST_AUTH_PATH2 "var/lib/polkit-1/localauthority"
@@ -37,7 +38,7 @@
 /* Test helper types */
 
 struct auth_context {
-  const gchar *identity;
+  const gchar *user;
   gboolean subject_is_local;
   gboolean subject_is_active;
   const gchar *action_id;
@@ -45,52 +46,67 @@ struct auth_context {
   PolkitImplicitAuthorization expect;
 };
 
-static PolkitBackendLocalAuthority *create_authority (void);
-
-
 /* Test implementations */
 
 static void
 test_check_authorization_sync (const void *_ctx)
 {
+  static const gchar *boolean[2] = { "false", "true" };
+
   const struct auth_context *ctx = (const struct auth_context *) _ctx;
 
-  PolkitBackendLocalAuthority *authority = create_authority ();
+  gchar *auth_path1 = polkit_test_get_data_path (TEST_AUTH_PATH1);
+  gchar *auth_path2 = polkit_test_get_data_path (TEST_AUTH_PATH2);
+  gchar *auth_paths = g_strconcat (auth_path1, ";", auth_path2, NULL);
+  g_assert (auth_path1 != NULL);
+  g_assert (auth_path2 != NULL);
+  g_assert (auth_paths != NULL);
 
-  PolkitSubject *caller = polkit_unix_session_new ("caller-session");
-  g_assert (caller);
-
-  PolkitSubject *subject = polkit_unix_session_new ("subject-session");;
-  g_assert (subject);
-
+  gchar *argv[8], *stdout_, *stderr_;
+  gint status;
   GError *error = NULL;
-  PolkitIdentity *user_for_subject = polkit_identity_from_string (ctx->identity, &error);
-  g_assert_no_error (error);
-  g_assert (user_for_subject);
+  gboolean ok;
 
-  PolkitDetails *details = polkit_details_new ();
-  g_assert (details);
+  argv[0] = PKLA_CHECK_AUTHORIZATION_PATH;
+  argv[1] = "-p";
+  argv[2] = auth_paths;
+  argv[3] = (gchar *)ctx->user;
+  argv[4] = (gchar *)boolean[ctx->subject_is_local];
+  argv[5] = (gchar *)boolean[ctx->subject_is_active];
+  argv[6] = (gchar *)ctx->action_id;
+  argv[7] = NULL;
+
+  ok = g_spawn_sync (".", argv, NULL, 0, NULL, NULL, &stdout_, &stderr_, &status,
+		     &error);
+  g_assert_no_error (error);
+  g_assert (ok);
+
+  ok = g_spawn_check_exit_status (status, &error);
+  g_assert_no_error (error);
+  g_assert (ok);
+
+  g_assert_cmpstr (stderr_, ==, "");
+
+  gchar *stdout_end = strchr (stdout_, '\0');
+  if (stdout_end > stdout_ && stdout_end[-1] == '\n')
+    stdout_end[-1] = '\0';
 
   PolkitImplicitAuthorization auth;
-
-  auth = polkit_backend_interactive_authority_check_authorization_sync (
-      POLKIT_BACKEND_INTERACTIVE_AUTHORITY (authority),
-      caller,
-      subject,
-      user_for_subject,
-      ctx->subject_is_local,
-      ctx->subject_is_active,
-      ctx->action_id,
-      details,
-      ctx->implicit);
+  if (*stdout_ == '\0')
+    auth = POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN;
+  else
+    {
+      ok = polkit_implicit_authorization_from_string (stdout_, &auth);
+      g_assert (ok);
+    }
 
   g_assert_cmpint (auth, ==, ctx->expect);
 
-  g_object_unref (authority);
-  g_object_unref (caller);
-  g_object_unref (subject);
-  g_object_unref (user_for_subject);
-  g_object_unref (details);
+  g_free (stdout_);
+  g_free (stderr_);
+  g_free (auth_paths);
+  g_free (auth_path2);
+  g_free (auth_path1);
 }
 
 static void
@@ -164,89 +180,61 @@ test_get_admin_identities (void)
 }
 
 
-/* Factory for mock local authority. */
-static PolkitBackendLocalAuthority *
-create_authority (void)
-{
-  gchar *config_path = polkit_test_get_data_path (TEST_CONFIG_PATH);
-  gchar *auth_path1 = polkit_test_get_data_path (TEST_AUTH_PATH1);
-  gchar *auth_path2 = polkit_test_get_data_path (TEST_AUTH_PATH2);
-  gchar *auth_paths = g_strconcat (auth_path1, ";", auth_path2, NULL);
-
-  g_assert (config_path);
-  g_assert (auth_path1);
-  g_assert (auth_path2);
-  g_assert (auth_paths);
-  
-  PolkitBackendLocalAuthority *authority = g_object_new (
-      POLKIT_BACKEND_TYPE_LOCAL_AUTHORITY,
-      "config-path", config_path,
-      "auth-store-paths", auth_paths,
-      NULL);
-  
-  g_free (config_path);
-  g_free (auth_path1);
-  g_free (auth_path2);
-  g_free (auth_paths);
-  return authority;
-}
-
-
 /* Variations of the check_authorization_sync */
 struct auth_context check_authorization_test_data [] = {
   /* Test root, john, and jane on action awesomeproduct.foo (all users are ok) */
-  {"unix-user:root", TRUE, TRUE, "com.example.awesomeproduct.foo",
+  {"root", TRUE, TRUE, "com.example.awesomeproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
-  {"unix-user:root", TRUE, FALSE, "com.example.awesomeproduct.foo",
+  {"root", TRUE, FALSE, "com.example.awesomeproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHENTICATION_REQUIRED},
-  {"unix-user:root", FALSE, FALSE, "com.example.awesomeproduct.foo",
+  {"root", FALSE, FALSE, "com.example.awesomeproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_NOT_AUTHORIZED},
-  {"unix-user:john", TRUE, TRUE, "com.example.awesomeproduct.foo",
+  {"john", TRUE, TRUE, "com.example.awesomeproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
-  {"unix-user:jane", TRUE, TRUE, "com.example.awesomeproduct.foo",
+  {"jane", TRUE, TRUE, "com.example.awesomeproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
 
   /* Test root, john, and jane on action restrictedproduct.foo (only root is ok) */
-  {"unix-user:root", TRUE, TRUE, "com.example.restrictedproduct.foo",
+  {"root", TRUE, TRUE, "com.example.restrictedproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHENTICATION_REQUIRED},
-  {"unix-user:john", TRUE, TRUE, "com.example.restrictedproduct.foo",
+  {"john", TRUE, TRUE, "com.example.restrictedproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN},
-  {"unix-user:jane", TRUE, TRUE, "com.example.restrictedproduct.foo",
+  {"jane", TRUE, TRUE, "com.example.restrictedproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN},
 
   /* Test root against some missing actions */
-  {"unix-user:root", TRUE, TRUE, "com.example.missingproduct.foo",
+  {"root", TRUE, TRUE, "com.example.missingproduct.foo",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN},
 
   /* Test root, john, and jane against action awesomeproduct.bar
    * which uses "unix-netgroup:baz" for auth (john and jane are OK, root is not) */
-  {"unix-user:root", TRUE, TRUE, "com.example.awesomeproduct.bar",
+  {"root", TRUE, TRUE, "com.example.awesomeproduct.bar",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN},
-  {"unix-user:john", TRUE, TRUE, "com.example.awesomeproduct.bar",
+  {"john", TRUE, TRUE, "com.example.awesomeproduct.bar",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
-  {"unix-user:jane", TRUE, TRUE, "com.example.awesomeproduct.bar",
+  {"jane", TRUE, TRUE, "com.example.awesomeproduct.bar",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
 
   /* Test user/group/default handling */
-  {"unix-user:john", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+  {"john", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHORIZED},
-  {"unix-user:sally", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+  {"sally", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_AUTHENTICATION_REQUIRED},
-  {"unix-user:jane", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
+  {"jane", TRUE, TRUE, "com.example.awesomeproduct.defaults-test",
       POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN,
       POLKIT_IMPLICIT_AUTHORIZATION_ADMINISTRATOR_AUTHENTICATION_REQUIRED},
 
@@ -258,7 +246,7 @@ struct auth_context check_authorization_test_data [] = {
 static void
 add_check_authorization_tests (void) {
   unsigned int i;
-  for (i = 0; check_authorization_test_data[i].identity; i++) {
+  for (i = 0; check_authorization_test_data[i].user; i++) {
     struct auth_context *ctx = &check_authorization_test_data[i];
     gchar *test_name = g_strdup_printf (
         "/PolkitBackendLocalAuthority/check_authorization_sync_%d", i);
