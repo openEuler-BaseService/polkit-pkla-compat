@@ -36,20 +36,15 @@ AM_CPPFLAGS =                                                   \
         -D_REENTRANT                                            \
         $(NULL)
 
-noinst_LTLIBRARIES=libpolkit-backend-1.la
+noinst_LIBRARIES = libpolkit-backend.a
 
-libpolkit_backend_1_la_SOURCES =                                   			\
+libpolkit_backend_a_SOURCES =                                   			\
 	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
         $(NULL)
 
-libpolkit_backend_1_la_CFLAGS =                                        	\
+libpolkit_backend_a_CFLAGS =                                        	\
         $(GLIB_CFLAGS)							\
 	$(POLKIT_CFLAGS)
-        $(NULL)
-
-libpolkit_backend_1_la_LIBADD =                               		\
-        $(GLIB_LIBS)							\
-	$(POLKIT_LIBS)							\
         $(NULL)
 
 rulesdir = $(sysconfdir)/polkit-1/rules.d

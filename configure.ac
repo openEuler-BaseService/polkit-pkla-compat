@@ -14,9 +14,10 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_SUBDIRS([test/mocklibc])
 
 AC_PROG_CC
-AM_PROG_LIBTOOL
+AC_PROG_RANLIB
 AC_SYS_LARGEFILE
 AM_PROG_CC_C_O
+AM_PROG_AR
 
 # Taken from dbus
 AC_ARG_ENABLE(ansi,             [  --enable-ansi           enable -ansi -pedantic gcc flags],enable_ansi=$enableval,enable_ansi=no)

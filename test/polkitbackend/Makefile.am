@@ -16,8 +16,8 @@ AM_CFLAGS =							\
 LDADD =  	                      				\
 	$(GLIB_LIBS)						\
 	$(POLKIT_LIBS)						\
-	$(top_builddir)/src/polkitbackend/libpolkit-backend-1.la\
-	$(top_builddir)/test/libpolkit-test-helper.la           \
+	$(top_builddir)/src/polkitbackend/libpolkit-backend.a	\
+	$(top_builddir)/test/libpolkit-test-helper.a		\
 	$(NULL)
 
 TEST_PROGS =
