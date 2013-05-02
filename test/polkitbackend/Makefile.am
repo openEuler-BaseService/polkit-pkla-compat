@@ -5,20 +5,11 @@ AM_CPPFLAGS =                                              	\
 	-I$(top_builddir)/src                           	\
 	-I$(top_srcdir)/src                             	\
 	-I$(top_srcdir)/test                             	\
-	-DPACKAGE_LIBEXEC_DIR=\""$(libexecdir)"\"       	\
-	-DPACKAGE_SYSCONF_DIR=\""$(sysconfdir)"\"       	\
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\"             	\
-	-DPACKAGE_BIN_DIR=\""$(bindir)"\"               	\
-	-DPACKAGE_LOCALSTATE_DIR=\""$(localstatedir)"\" 	\
-	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\"         	\
-	-DPACKAGE_LIB_DIR=\""$(libdir)"\"               	\
 	-D_POSIX_PTHREAD_SEMANTICS                      	\
 	-D_REENTRANT	                                	\
 	$(NULL)
 
 AM_CFLAGS =							\
-        -D_POLKIT_COMPILATION                                   \
-        -D_POLKIT_BACKEND_COMPILATION                           \
 	$(GLIB_CFLAGS)						\
 	$(POLKIT_CFLAGS)					\
 	$(NULL)
