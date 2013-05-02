@@ -143,7 +143,6 @@ AM_GNU_GETTEXT_VERSION([0.18.1])
 AC_CONFIG_FILES([
 Makefile
 src/polkitbackend/Makefile
-docs/man/Makefile
 po/Makefile.in
 test/Makefile
 test/polkitbackend/Makefile
