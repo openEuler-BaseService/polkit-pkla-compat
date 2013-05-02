@@ -102,6 +102,7 @@ test_get_admin_identities (void)
   gboolean ok;
 
   config_path = polkit_test_get_data_path (TEST_CONFIG_PATH);
+  g_assert (config_path != NULL);
 
   /* Get the list of PolkitUnixUser objects who are admins */
   error = NULL;
