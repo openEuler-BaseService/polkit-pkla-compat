@@ -377,7 +377,7 @@ main (int argc, char *argv[])
   GError *error;
   GOptionContext *opt_context;
   PolkitBackendLocalAuthorityPrivate priv;
-  PolkitIdentity *user_for_subject;
+  PolkitIdentity *user_for_subject = NULL;
   gboolean subject_is_local, subject_is_active;
   PolkitDetails *details;
   PolkitImplicitAuthorization result;
@@ -454,6 +454,7 @@ main (int argc, char *argv[])
      details);
   g_object_unref (details);
 
+  g_object_unref (user_for_subject);
   polkit_backend_local_authority_finalize (&priv);
 
   if (result != POLKIT_IMPLICIT_AUTHORIZATION_UNKNOWN)
@@ -462,6 +463,7 @@ main (int argc, char *argv[])
   return 0;
 
  error_priv:
+  g_object_unref (user_for_subject);
   polkit_backend_local_authority_finalize (&priv);
  error:
   g_free (auth_paths);
