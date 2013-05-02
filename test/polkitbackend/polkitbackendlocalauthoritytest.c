@@ -22,10 +22,14 @@
 #include "config.h"
 #include "glib.h"
 
+#include <string.h>
+
 #include <polkittesthelper.h>
 #include <polkit/polkit.h>
 #include <polkitbackend/polkitbackendlocalauthority.h>
 
+#define BUILD_UTILITIES_DIR "../../src/polkitbackend"
+#define PKLA_ADMIN_IDENTITIES_PATH BUILD_UTILITIES_DIR "/pkla-admin-identities"
 #define TEST_CONFIG_PATH "etc/polkit-1/localauthority.conf.d"
 #define TEST_AUTH_PATH1 "etc/polkit-1/localauthority"
 #define TEST_AUTH_PATH2 "var/lib/polkit-1/localauthority"
@@ -92,47 +96,45 @@ test_check_authorization_sync (const void *_ctx)
 static void
 test_get_admin_identities (void)
 {
-  /* Note: The implementation for get_admin_identities is called
-   * get_admin_auth_identities in PolkitBackendLocalAuthority */
+  gchar *config_path, *argv[4], *stdout, *stderr;
+  int status;
+  GError *error;
+  gboolean ok;
 
-  PolkitBackendLocalAuthority *authority = create_authority ();
-
-  /* Setup required arguments, but none of their values matter */
-  PolkitSubject *caller = polkit_unix_session_new ("caller-session");
-  g_assert (caller);
-
-  PolkitSubject *subject = polkit_unix_session_new ("subject-session");;
-  g_assert (subject);
-
-  GError *error = NULL;
-  PolkitIdentity *user_for_subject = polkit_identity_from_string ("unix-user:root", &error);
-  g_assert_no_error (error);
-  g_assert (user_for_subject);
-
-  PolkitDetails *details = polkit_details_new ();
-  g_assert (details);
+  config_path = polkit_test_get_data_path (TEST_CONFIG_PATH);
 
   /* Get the list of PolkitUnixUser objects who are admins */
-  GList *result;
-  result = polkit_backend_interactive_authority_get_admin_identities (
-      POLKIT_BACKEND_INTERACTIVE_AUTHORITY (authority),
-      caller,
-      subject,
-      user_for_subject,
-      FALSE,
-      FALSE,
-      "com.example.doesntmatter",
-      details);
+  error = NULL;
+  argv[0] = PKLA_ADMIN_IDENTITIES_PATH;
+  argv[1] = "-c";
+  argv[2] = config_path;
+  argv[3] = NULL;
+  ok = g_spawn_sync (".", argv, NULL, 0, NULL, NULL, &stdout, &stderr, &status,
+		     &error);
+  g_assert_no_error (error);
+  g_assert (ok);
 
-  guint result_len = g_list_length (result);
+  ok = g_spawn_check_exit_status (status, &error);
+  g_assert_no_error (error);
+  g_assert (ok);
+
+  g_assert_cmpstr (stderr, ==, "");
+
+  /* Drop last '\n' so that g_strsplit doesn't add an empty string */
+  gchar *stdout_end = strchr (stdout, '\0');
+  if (stdout_end > stdout && stdout_end[-1] == '\n')
+    stdout_end[-1] = '\0';
+
+  gchar **result = g_strsplit (stdout, "\n", 0);
+
+  guint result_len = g_strv_length (result);
   g_assert_cmpint (result_len, >, 0);
 
   /* Test against each of the admins in the following list */
   const gchar *expect_admins [] = {
     "unix-user:root",
-    "unix-user:jane",
-    "unix-user:sally",
-    "unix-user:henry",
+    "unix-netgroup:bar",
+    "unix-group:admin",
     NULL,
   };
 
@@ -141,12 +143,23 @@ test_get_admin_identities (void)
   {
     g_assert_cmpint (i, <, result_len);
 
-    PolkitIdentity *test_identity = POLKIT_IDENTITY (g_list_nth_data (result, i));
+    PolkitIdentity *test_identity = polkit_identity_from_string (result[i],
+								 &error);
+    g_assert_no_error (error);
     g_assert (test_identity);
 
     gchar *test_identity_str = polkit_identity_to_string (test_identity);
     g_assert_cmpstr (expect_admins[i], ==, test_identity_str);
+
+    g_free (test_identity_str);
+    g_object_unref (test_identity);
   }
+  g_assert (result[i] == NULL);
+
+  g_strfreev (result);
+  g_free (stdout);
+  g_free (stderr);
+  g_free (config_path);
 }
 
 
