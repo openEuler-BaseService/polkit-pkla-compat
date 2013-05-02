@@ -122,9 +122,9 @@ main (int argc, char *argv[])
   g_option_context_free (opt_context);
   if (argc != 1)
     {
-      fprintf (stderr, _("Unexpected argument\n"
+      fprintf (stderr, _("%s: unexpected argument\n"
 			 "Run `%s --help' for more information.\n"),
-	       g_get_prgname ());
+	       g_get_prgname (), g_get_prgname ());
       return EXIT_FAILURE;
     }
 
