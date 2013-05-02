@@ -262,6 +262,7 @@ add_check_authorization_tests (void) {
     gchar *test_name = g_strdup_printf (
         "/PolkitBackendLocalAuthority/check_authorization_sync_%d", i);
     g_test_add_data_func (test_name, ctx, test_check_authorization_sync);
+    g_free (test_name);
   }
 };
 
