@@ -96,7 +96,7 @@ test_check_authorization_sync (const void *_ctx)
 static void
 test_get_admin_identities (void)
 {
-  gchar *config_path, *argv[4], *stdout, *stderr;
+  gchar *config_path, *argv[4], *stdout_, *stderr_;
   int status;
   GError *error;
   gboolean ok;
@@ -109,7 +109,7 @@ test_get_admin_identities (void)
   argv[1] = "-c";
   argv[2] = config_path;
   argv[3] = NULL;
-  ok = g_spawn_sync (".", argv, NULL, 0, NULL, NULL, &stdout, &stderr, &status,
+  ok = g_spawn_sync (".", argv, NULL, 0, NULL, NULL, &stdout_, &stderr_, &status,
 		     &error);
   g_assert_no_error (error);
   g_assert (ok);
@@ -118,14 +118,14 @@ test_get_admin_identities (void)
   g_assert_no_error (error);
   g_assert (ok);
 
-  g_assert_cmpstr (stderr, ==, "");
+  g_assert_cmpstr (stderr_, ==, "");
 
   /* Drop last '\n' so that g_strsplit doesn't add an empty string */
-  gchar *stdout_end = strchr (stdout, '\0');
-  if (stdout_end > stdout && stdout_end[-1] == '\n')
+  gchar *stdout_end = strchr (stdout_, '\0');
+  if (stdout_end > stdout_ && stdout_end[-1] == '\n')
     stdout_end[-1] = '\0';
 
-  gchar **result = g_strsplit (stdout, "\n", 0);
+  gchar **result = g_strsplit (stdout_, "\n", 0);
 
   guint result_len = g_strv_length (result);
   g_assert_cmpint (result_len, >, 0);
@@ -157,8 +157,8 @@ test_get_admin_identities (void)
   g_assert (result[i] == NULL);
 
   g_strfreev (result);
-  g_free (stdout);
-  g_free (stderr);
+  g_free (stdout_);
+  g_free (stderr_);
   g_free (config_path);
 }
 
