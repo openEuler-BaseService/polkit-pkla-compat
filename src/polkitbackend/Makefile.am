@@ -56,7 +56,6 @@ libpolkit_backend_1_la_CFLAGS =                                        	\
 libpolkit_backend_1_la_LIBADD =                               		\
         $(GLIB_LIBS)							\
 	$(POLKIT_LIBS)							\
-	$(EXPAT_LIBS)							\
         $(NULL)
 
 rulesdir = $(sysconfdir)/polkit-1/rules.d

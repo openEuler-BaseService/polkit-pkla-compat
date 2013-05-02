@@ -114,19 +114,6 @@ PKG_CHECK_MODULES([POLKIT], [polkit-gobject-1])
 AC_SUBST([POLKIT_CFLAGS])
 AC_SUBST([POLKIT_LIBS])
 
-AC_ARG_WITH(expat, [  --with-expat=<dir>      Use expat from here],
-                      [
-                      expat=$withval
-                      CPPFLAGS="$CPPFLAGS -I$withval/include"
-                      LDFLAGS="$LDFLAGS -L$withval/lib"
-                      ]
-                      )
-AC_CHECK_HEADERS([expat.h], ,
-		 [AC_MSG_ERROR([Can't find expat.h. Please install expat.])])
-AC_CHECK_LIB([expat], [XML_ParserCreate], [true],
-	     [AC_MSG_ERROR([Can't find expat library. Please install expat.])])
-AC_SUBST([EXPAT_LIBS], [-lexpat])
-
 if test "x$GCC" = "xyes"; then
   LDFLAGS="-Wl,--as-needed $LDFLAGS"
 fi
