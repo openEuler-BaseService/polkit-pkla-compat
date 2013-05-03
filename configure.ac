@@ -145,7 +145,6 @@ Makefile
 src/polkitbackend/Makefile
 po/Makefile.in
 test/Makefile
-test/polkitbackend/Makefile
 ])
 AC_OUTPUT
 
