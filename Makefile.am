@@ -32,12 +32,10 @@ src_polkitbackend_pkla_admin_identities_SOURCES = \
 src_polkitbackend_pkla_admin_identities_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(PKLA_CPPFLAGS)
 
-src_polkitbackend_pkla_check_authorization_SOURCES = \
-	src/polkitbackend/pkla-check-authorization.c \
-	src/polkitbackend/polkitbackendlocalauthorizationstore.c \
-	src/polkitbackend/polkitbackendlocalauthorizationstore.h
 src_polkitbackend_pkla_check_authorization_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(PKLA_CPPFLAGS)
+src_polkitbackend_pkla_check_authorization_LDADD = $(LDADD) \
+	src/polkitbackend/libpolkit-backend.a
 
 %.8 %.1 : %.xml
 	$(XSLTPROC) -nonet --xinclude -o $@ \
