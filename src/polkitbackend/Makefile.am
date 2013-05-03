@@ -5,29 +5,9 @@ bin_PROGRAMS = pkla-admin-identities pkla-check-authorization
 pkla_admin_identities_SOURCES = pkla-admin-identities.c \
 	polkitbackendconfigsource.h polkitbackendconfigsource.c
 
-pkla_admin_identities_CFLAGS =                                        	\
-        $(POLKIT_CFLAGS)						\
-        $(GLIB_CFLAGS)							\
-        $(NULL)
-
-pkla_admin_identities_LDADD =                                        	\
-        $(POLKIT_LIBS)							\
-        $(GLIB_LIBS)							\
-        $(NULL)
-
 pkla_check_authorization_SOURCES = pkla-check-authorization.c \
 	polkitbackendlocalauthorizationstore.h \
 	polkitbackendlocalauthorizationstore.c
-
-pkla_check_authorization_CFLAGS =                                      	\
-        $(POLKIT_CFLAGS)						\
-        $(GLIB_CFLAGS)							\
-        $(NULL)
-
-pkla_check_authorization_LDADD =                                      	\
-        $(POLKIT_LIBS)							\
-        $(GLIB_LIBS)							\
-        $(NULL)
 
 AM_CPPFLAGS =                                                   \
         -DPACKAGE_SYSCONF_DIR=\""$(sysconfdir)"\"               \
@@ -36,15 +16,14 @@ AM_CPPFLAGS =                                                   \
         -D_REENTRANT                                            \
         $(NULL)
 
+AM_CFLAGS = $(POLKIT_CFLAGS) $(GLIB_CFLAGS)
+
+LDADD = $(POLKIT_LIBS) $(GLIB_LIBS)
+
 noinst_LIBRARIES = libpolkit-backend.a
 
 libpolkit_backend_a_SOURCES =                                   			\
 	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
-        $(NULL)
-
-libpolkit_backend_a_CFLAGS =                                        	\
-        $(GLIB_CFLAGS)							\
-	$(POLKIT_CFLAGS)
         $(NULL)
 
 rulesdir = $(sysconfdir)/polkit-1/rules.d
