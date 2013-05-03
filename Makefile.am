@@ -16,16 +16,14 @@ localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
 rulesdir = $(sysconfdir)/polkit-1/rules.d
 
 ## Targets
-SUBDIRS = src/polkitbackend po test
+SUBDIRS = po test
 
-bin_PROGRAMS = src/polkitbackend/pkla-admin-identities \
-	src/polkitbackend/pkla-check-authorization
-dist_localauthorityconfig_DATA = 50-localauthority.conf
+bin_PROGRAMS = src/pkla-admin-identities src/pkla-check-authorization
+dist_localauthorityconfig_DATA = src/50-localauthority.conf
 man_MANS = docs/pklocalauthority.8
-rules_DATA = src/polkitbackend/50-pkla.rules
+rules_DATA = src/50-pkla.rules
 
-noinst_LIBRARIES = src/polkitbackend/libpolkit-backend.a \
-	test/libpolkit-test-helper.a
+noinst_LIBRARIES = src/libpolkit-backend.a test/libpolkit-test-helper.a
 
 check_PROGRAMS = test/polkitbackendlocalauthoritytest \
 	test/polkitbackendlocalauthorizationstoretest
@@ -34,35 +32,26 @@ TESTS = $(check_PROGRAMS)
 
 ## Rules
 CLEANFILES = $(man_MANS) $(rules_DATA)
-EXTRA_DIST = docs/pklocalauthority.xml src/polkitbackend/50-pkla.rules.in \
-	test/data
+EXTRA_DIST = docs/pklocalauthority.xml src/50-pkla.rules.in test/data
 
-src_polkitbackend_libpolkit_backend_a_SOURCES = \
-	src/polkitbackend/polkitbackendlocalauthorizationstore.c \
-	src/polkitbackend/polkitbackendlocalauthorizationstore.h
+src_libpolkit_backend_a_SOURCES = src/polkitbackendlocalauthorizationstore.c \
+	src/polkitbackendlocalauthorizationstore.h
 
-src_polkitbackend_pkla_admin_identities_SOURCES = \
-	src/polkitbackend/pkla-admin-identities.c \
-	src/polkitbackend/polkitbackendconfigsource.c \
-	src/polkitbackend/polkitbackendconfigsource.h
-src_polkitbackend_pkla_admin_identities_CPPFLAGS = $(AM_CPPFLAGS) \
-	$(PKLA_CPPFLAGS)
+src_pkla_admin_identities_SOURCES = src/pkla-admin-identities.c \
+	src/polkitbackendconfigsource.c src/polkitbackendconfigsource.h
+src_pkla_admin_identities_CPPFLAGS = $(AM_CPPFLAGS) $(PKLA_CPPFLAGS)
 
-src_polkitbackend_pkla_check_authorization_CPPFLAGS = $(AM_CPPFLAGS) \
-	$(PKLA_CPPFLAGS)
-src_polkitbackend_pkla_check_authorization_LDADD = $(LDADD) \
-	src/polkitbackend/libpolkit-backend.a
+src_pkla_check_authorization_CPPFLAGS = $(AM_CPPFLAGS) $(PKLA_CPPFLAGS)
+src_pkla_check_authorization_LDADD = $(LDADD) src/libpolkit-backend.a
 
 test_libpolkit_test_helper_a_SOURCES = test/polkittesthelper.c \
 	test/polkittesthelper.h
 
-test_polkitbackendlocalauthoritytest_LDADD = $(LDADD) \
-	src/polkitbackend/libpolkit-backend.a test/libpolkit-test-helper.a
+test_polkitbackendlocalauthoritytest_LDADD = $(LDADD) src/libpolkit-backend.a \
+	test/libpolkit-test-helper.a
 
-test_polkitbackendlocalauthorizationstoretest_CPPFLAGS = $(AM_CPPFLAGS) \
-	-I$(top_srcdir)/src
 test_polkitbackendlocalauthorizationstoretest_LDADD = $(LDADD) \
-	src/polkitbackend/libpolkit-backend.a test/libpolkit-test-helper.a
+	src/libpolkit-backend.a test/libpolkit-test-helper.a
 
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/lib/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
@@ -76,5 +65,5 @@ install-data-local:
 	$(XSLTPROC) -nonet --xinclude -o $@ \
 		http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 
-src/polkitbackend/50-pkla.rules: src/polkitbackend/50-pkla.rules.in Makefile
-	sed 's,@bindir@,$(bindir),g' < $(srcdir)/src/polkitbackend/50-pkla.rules.in > $@
+src/50-pkla.rules: src/50-pkla.rules.in Makefile
+	sed 's,@bindir@,$(bindir),g' < $(srcdir)/src/50-pkla.rules.in > $@

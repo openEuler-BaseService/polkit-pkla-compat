@@ -1,4 +1,4 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
-src/polkitbackend/pkla-admin-identities.c
-src/polkitbackend/pkla-check-authorization.c
+src/pkla-admin-identities.c
+src/pkla-check-authorization.c

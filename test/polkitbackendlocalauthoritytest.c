@@ -28,7 +28,7 @@
 
 #include "polkittesthelper.h"
 
-#define BUILD_UTILITIES_DIR "src/polkitbackend"
+#define BUILD_UTILITIES_DIR "src"
 #define PKLA_ADMIN_IDENTITIES_PATH BUILD_UTILITIES_DIR "/pkla-admin-identities"
 #define PKLA_CHECK_AUTHORIZATION_PATH BUILD_UTILITIES_DIR "/pkla-check-authorization"
 #define TEST_CONFIG_PATH "etc/polkit-1/localauthority.conf.d"
