@@ -1,5 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
+## Settings
+# The overrides below are quite intentional
+AUTOMAKE_OPTIONS = -Wno-override
+
 ## Targets
 SUBDIRS = mocklibc
 
