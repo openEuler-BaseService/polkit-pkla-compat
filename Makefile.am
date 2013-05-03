@@ -15,7 +15,8 @@ bin_PROGRAMS = src/polkitbackend/pkla-admin-identities \
 	src/polkitbackend/pkla-check-authorization
 man_MANS = docs/pklocalauthority.8
 
-noinst_LIBRARIES = src/polkitbackend/libpolkit-backend.a
+noinst_LIBRARIES = src/polkitbackend/libpolkit-backend.a \
+	test/libpolkit-test-helper.a
 
 ## Rules
 CLEANFILES = $(man_MANS)
@@ -36,6 +37,9 @@ src_polkitbackend_pkla_check_authorization_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(PKLA_CPPFLAGS)
 src_polkitbackend_pkla_check_authorization_LDADD = $(LDADD) \
 	src/polkitbackend/libpolkit-backend.a
+
+test_libpolkit_test_helper_a_SOURCES = test/polkittesthelper.c \
+	test/polkittesthelper.h
 
 %.8 %.1 : %.xml
 	$(XSLTPROC) -nonet --xinclude -o $@ \

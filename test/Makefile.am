@@ -1,9 +1,5 @@
 
 SUBDIRS = mocklibc . polkitbackend
-AM_CFLAGS = $(GLIB_CFLAGS)
-
-noinst_LIBRARIES = libpolkit-test-helper.a
-libpolkit_test_helper_a_SOURCES = polkittesthelper.c polkittesthelper.h
 
 EXTRA_DIST = data
 
