@@ -120,17 +120,18 @@ if test "x$GCC" = "xyes"; then
 fi
 
 dnl ---------------------------------------------------------------------------
-dnl - User for running polkitd
+dnl - Group polkid runs as
 dnl ---------------------------------------------------------------------------
 
-AC_ARG_WITH(polkitd_user, AS_HELP_STRING([--with-polkitd-user=<user>],[User for running polkitd (polkitd)]))
-
-if test -z "$with_polkitd_user" ; then
-    POLKITD_USER=polkitd
+AC_ARG_WITH([polkitd_group],
+	    [AS_HELP_STRING([--with-polkitd-group=<user>],
+                            [Group polkitd runs as (polkitd)])])
+if test -z "$with_polkitd_group" ; then
+    POLKITD_GROUP=polkitd
 else
-    POLKITD_USER=$with_polkitd_user
+    POLKITD_GROUP=$with_polkitd_group
 fi
-AC_SUBST(POLKITD_USER)
+AC_SUBST([POLKITD_GROUP])
 
 
 # ********************
@@ -166,16 +167,14 @@ echo "
         cppflags:                   ${CPPFLAGS}
         xsltproc:                   ${XSLTPROC}
 
-        polkitd user:               ${POLKITD_USER}"
+        polkitd group:              ${POLKITD_GROUP}"
 echo "
 
 
 "
-
-echo "NOTE: The directory ${sysconfdir}/polkit-1/rules.d must be owned"
-echo "      by user '$POLKITD_USER' and have mode 700"
+echo "NOTE: The directory ${sysconfdir}/polkit-1/localauthority must be owned"
+echo "      by root:$POLKITD_GROUP and have mode 750"
 echo
-
-echo "NOTE: The directory ${datadir}/polkit-1/rules.d must be owned"
-echo "      by user '$POLKITD_USER' and have mode 700"
+echo "NOTE: The directory ${localstatedir}/lib/polkit-1 must be owned"
+echo "      by root:$POLKITD_GROUP and have mode 750"
 echo
