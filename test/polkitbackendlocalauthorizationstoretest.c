@@ -22,9 +22,10 @@
 #include "config.h"
 #include "glib.h"
 
-#include <polkittesthelper.h>
 #include <polkit/polkit.h>
 #include <polkitbackend/polkitbackendlocalauthorizationstore.h>
+
+#include "polkittesthelper.h"
 
 #define DATA_DIR "etc/polkit-1/localauthority/10-test"
 #define DATA_EXT ".pkla"

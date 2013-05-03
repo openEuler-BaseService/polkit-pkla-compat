@@ -24,8 +24,9 @@
 
 #include <string.h>
 
-#include <polkittesthelper.h>
 #include <polkit/polkit.h>
+
+#include "polkittesthelper.h"
 
 #define BUILD_UTILITIES_DIR "src/polkitbackend"
 #define PKLA_ADMIN_IDENTITIES_PATH BUILD_UTILITIES_DIR "/pkla-admin-identities"
