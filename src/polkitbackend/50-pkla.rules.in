@@ -1,7 +1,7 @@
 polkit.addAdminRule(function(action, subject) {
 	//polkit.log('Starting pkla-admin-identities\n');
 	// Let exception, if any, propagate to the JS authority
-	var res = polkit.spawn(['/usr/bin/pkla-admin-identities']);
+	var res = polkit.spawn(['@bindir@/pkla-admin-identities']);
 	//polkit.log('Got "' + res.replace(/\n/g, '\\n') + '"\n');
 	if (res == '')
 		return null;
@@ -14,7 +14,7 @@ polkit.addAdminRule(function(action, subject) {
 });
 
 polkit.addRule(function(action, subject) {
-	var params = ['/usr/bin/pkla-check-authorization',
+	var params = ['@bindir@/pkla-check-authorization',
 		      subject.user, subject.local ? 'true' : 'false',
 		      subject.active ? 'true' : 'false', action.id];
 	//polkit.log('Starting ' + params.join(' ') + '\n');

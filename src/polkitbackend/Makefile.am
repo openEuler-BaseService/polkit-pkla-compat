@@ -1,5 +1,11 @@
 rulesdir = $(sysconfdir)/polkit-1/rules.d
-dist_rules_DATA = 50-pkla.rules
+rules_DATA = 50-pkla.rules
+EXTRA_DIST = 50-pkla.rules.in
+
+CLEANFILES = $(rules_DATA)
+
+50-pkla.rules: 50-pkla.rules.in Makefile
+	sed 's,@bindir@,$(bindir),g' < $(srcdir)/50-pkla.rules.in > $@
 
 # ----------------------------------------------------------------------------------------------------
 
