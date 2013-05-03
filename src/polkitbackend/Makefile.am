@@ -1,31 +1,3 @@
-NULL =
-
-bin_PROGRAMS = pkla-admin-identities pkla-check-authorization
-
-pkla_admin_identities_SOURCES = pkla-admin-identities.c \
-	polkitbackendconfigsource.h polkitbackendconfigsource.c
-
-pkla_check_authorization_SOURCES = pkla-check-authorization.c \
-	polkitbackendlocalauthorizationstore.h \
-	polkitbackendlocalauthorizationstore.c
-
-AM_CPPFLAGS =                                                   \
-        -DPACKAGE_SYSCONF_DIR=\""$(sysconfdir)"\"               \
-        -DPACKAGE_LOCALSTATE_DIR=\""$(localstatedir)"\"         \
-        -D_POSIX_PTHREAD_SEMANTICS                              \
-        -D_REENTRANT                                            \
-        $(NULL)
-
-AM_CFLAGS = $(POLKIT_CFLAGS) $(GLIB_CFLAGS)
-
-LDADD = $(POLKIT_LIBS) $(GLIB_LIBS)
-
-noinst_LIBRARIES = libpolkit-backend.a
-
-libpolkit_backend_a_SOURCES =                                   			\
-	polkitbackendlocalauthorizationstore.h	polkitbackendlocalauthorizationstore.c	\
-        $(NULL)
-
 rulesdir = $(sysconfdir)/polkit-1/rules.d
 dist_rules_DATA = 50-pkla.rules
 
