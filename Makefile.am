@@ -12,13 +12,17 @@ TESTS_ENVIRONMENT = MOCK_PASSWD=$(abs_top_srcdir)/test/data/etc/passwd \
 	MOCK_NETGROUP=$(abs_top_srcdir)/test/data/etc/netgroup \
 	POLKIT_TEST_DATA=$(abs_top_srcdir)/test/data \
 	$(abs_top_builddir)/test/mocklibc/bin/mocklibc
+localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
+rulesdir = $(sysconfdir)/polkit-1/rules.d
 
 ## Targets
 SUBDIRS = src/polkitbackend po test
 
 bin_PROGRAMS = src/polkitbackend/pkla-admin-identities \
 	src/polkitbackend/pkla-check-authorization
+dist_localauthorityconfig_DATA = 50-localauthority.conf
 man_MANS = docs/pklocalauthority.8
+rules_DATA = src/polkitbackend/50-pkla.rules
 
 noinst_LIBRARIES = src/polkitbackend/libpolkit-backend.a \
 	test/libpolkit-test-helper.a
@@ -29,8 +33,9 @@ noinst_PROGRAMS = $(check_PROGRAMS)
 TESTS = $(check_PROGRAMS)
 
 ## Rules
-CLEANFILES = $(man_MANS)
-EXTRA_DIST = docs/pklocalauthority.xml test/data
+CLEANFILES = $(man_MANS) $(rules_DATA)
+EXTRA_DIST = docs/pklocalauthority.xml src/polkitbackend/50-pkla.rules.in \
+	test/data
 
 src_polkitbackend_libpolkit_backend_a_SOURCES = \
 	src/polkitbackend/polkitbackendlocalauthorizationstore.c \
@@ -59,6 +64,17 @@ test_polkitbackendlocalauthorizationstoretest_CPPFLAGS = $(AM_CPPFLAGS) \
 test_polkitbackendlocalauthorizationstoretest_LDADD = $(LDADD) \
 	src/polkitbackend/libpolkit-backend.a test/libpolkit-test-helper.a
 
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/lib/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
+	-chmod 750 $(DESTDIR)$(localstatedir)/lib/polkit-1
+	-chown root:$(POLKITD_GROUP) $(DESTDIR)$(localstatedir)/lib/polkit-1
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
+	-chmod 750 $(DESTDIR)$(sysconfdir)/polkit-1/localauthority
+	-chown root:$(POLKITD_GROUP) $(DESTDIR)$(sysconfdir)/polkit-1/localauthority
+
 %.8 %.1 : %.xml
 	$(XSLTPROC) -nonet --xinclude -o $@ \
 		http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
+
+src/polkitbackend/50-pkla.rules: src/polkitbackend/50-pkla.rules.in Makefile
+	sed 's,@bindir@,$(bindir),g' < $(srcdir)/src/polkitbackend/50-pkla.rules.in > $@

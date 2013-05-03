@@ -142,12 +142,7 @@ AC_SUBST([POLKITD_GROUP])
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.18.1])
 
-AC_CONFIG_FILES([
-Makefile
-src/polkitbackend/Makefile
-po/Makefile.in
-test/Makefile
-])
+AC_CONFIG_FILES([Makefile po/Makefile.in test/Makefile])
 AC_OUTPUT
 
 dnl ==========================================================================
