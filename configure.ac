@@ -151,10 +151,7 @@ echo "
                 =================
 
         prefix:                     ${prefix}
-        libdir:                     ${libdir}
-        libexecdir:                 ${libexecdir}
         bindir:                     ${bindir}
-        datadir:                    ${datadir}
         sysconfdir:                 ${sysconfdir}
         localstatedir:              ${localstatedir}
 
