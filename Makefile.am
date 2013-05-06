@@ -12,14 +12,12 @@ TESTS_ENVIRONMENT = MOCK_PASSWD=$(abs_top_srcdir)/test/data/etc/passwd \
 	MOCK_NETGROUP=$(abs_top_srcdir)/test/data/etc/netgroup \
 	POLKIT_TEST_DATA=$(abs_top_srcdir)/test/data \
 	$(abs_top_builddir)/test/mocklibc/bin/mocklibc
-localauthorityconfigdir = $(sysconfdir)/polkit-1/localauthority.conf.d
 rulesdir = $(sysconfdir)/polkit-1/rules.d
 
 ## Targets
 SUBDIRS = po test
 
 bin_PROGRAMS = src/pkla-admin-identities src/pkla-check-authorization
-dist_localauthorityconfig_DATA = src/50-localauthority.conf
 man_MANS = docs/pkla-admin-identities.8 docs/pkla-check-authorization.8 \
 	docs/pklocalauthority.8
 rules_DATA = src/50-pkla.rules
@@ -57,6 +55,7 @@ test_polkitbackendlocalauthorizationstoretest_LDADD = $(LDADD) \
 	src/libpolkit-backend.a test/libpolkit-test-helper.a
 
 install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/polkit-1/localauthority.conf.d
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/lib/polkit-1/localauthority/{10-vendor.d,20-org.d,30-site.d,50-local.d,90-mandatory.d}
 	-chmod 750 $(DESTDIR)$(localstatedir)/lib/polkit-1
 	-chown root:$(POLKITD_GROUP) $(DESTDIR)$(localstatedir)/lib/polkit-1
