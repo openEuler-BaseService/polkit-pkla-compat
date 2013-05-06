@@ -20,7 +20,7 @@ SUBDIRS = po test
 bin_PROGRAMS = src/pkla-admin-identities src/pkla-check-authorization
 man_MANS = docs/pkla-admin-identities.8 docs/pkla-check-authorization.8 \
 	docs/pklocalauthority.8
-rules_DATA = src/50-pkla.rules
+rules_DATA = src/49-polkit-pkla-compat.rules
 
 noinst_LIBRARIES = src/libpolkit-backend.a test/libpolkit-test-helper.a
 
@@ -33,7 +33,7 @@ TESTS = $(check_PROGRAMS)
 CLEANFILES = $(man_MANS) $(rules_DATA)
 EXTRA_DIST = docs/pkla-admin-identities.xml docs/pkla-check-authorization.xml \
 	docs/pklocalauthority.xml \
-	src/50-pkla.rules.in test/data
+	src/49-polkit-pkla-compat.rules.in test/data
 
 src_libpolkit_backend_a_SOURCES = src/polkitbackendlocalauthorizationstore.c \
 	src/polkitbackendlocalauthorizationstore.h
@@ -67,5 +67,6 @@ install-data-local:
 	$(XSLTPROC) -nonet --xinclude -o $@ \
 		http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 
-src/50-pkla.rules: src/50-pkla.rules.in Makefile
-	sed 's,@bindir@,$(bindir),g' < $(srcdir)/src/50-pkla.rules.in > $@
+src/49-polkit-pkla-compat.rules: src/49-polkit-pkla-compat.rules.in Makefile
+	sed 's,@bindir@,$(bindir),g' \
+		< $(srcdir)/src/49-polkit-pkla-compat.rules.in > $@

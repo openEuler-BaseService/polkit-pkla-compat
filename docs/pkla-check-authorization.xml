@@ -57,8 +57,8 @@
 	<manvolnum>8</manvolnum>
       </citerefentry>.
       <command>pkla-check-authorization</command> is called by a JavaScript rule
-      file named <filename>50-pkla.rules</filename>; other JavaScript rules
-      with a higher priority may exist, so the
+      file named <filename>49-polkit-pkla-compat.rules</filename>; other
+      JavaScript rules with a higher priority may exist, so the
       <command>pkla-check-authorization</command> configuration may not
       necessarily govern the final
       <citerefentry>
