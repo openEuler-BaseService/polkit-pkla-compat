@@ -1,0 +1,534 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" []>
+<refentry>
+  <refentryinfo>
+    <title>pkla-check-authorization</title>
+    <date>May 2013</date>
+    <productname>polkit-pkla-compat</productname>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle>pkla-check-authorization</refentrytitle>
+    <manvolnum>8</manvolnum>
+    <refmiscinfo class="version"></refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>pkla-check-authorization</refname>
+    <refpurpose>
+      Evaluate pklocalauthority authorization configuration
+    </refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>pkla-check-authorization</command>
+      <arg><option>--help</option></arg>
+    </cmdsynopsis>
+
+    <cmdsynopsis>
+      <command>pkla-check-authorization</command>
+      <arg><option>--paths</option> <replaceable>paths</replaceable></arg>
+      <arg choice="req"><replaceable>user-name</replaceable></arg>
+      <arg choice="req"><replaceable>is-local</replaceable></arg>
+      <arg choice="req"><replaceable>is-active</replaceable></arg>
+      <arg choice="req"><replaceable>action</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>DESCRIPTION</title>
+    <para>
+      <command>pkla-check-authorization</command> interprets non-JavaScript
+      configuration files described below to determine the response of
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>
+      to authorization queries.
+    </para>
+
+    <para>
+      <emphasis>Note:</emphasis> Authorization decision evaluation is driven by
+      JavaScript rules as described in
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>.
+      <command>pkla-check-authorization</command> is called by a JavaScript rule
+      file named <filename>50-pkla.rules</filename>; other JavaScript rules
+      with a higher priority may exist, so the
+      <command>pkla-check-authorization</command> configuration may not
+      necessarily govern the final
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>
+      authorization decision.
+    </para>
+
+    <para>
+      The ordering of the JavaScript rule files and the ordering of
+      <command>pkla-check-authorization</command> configuration files is not
+      integrated and uses different rules; the
+      <command>pkla-check-authorization</command> configuration evaluation is
+      happens at a single point within the JavaScript rule evaluation
+      order.
+    </para>
+
+    <para>
+      <command>pkla-check-authorization</command> is an internal helper program
+      of <application>pkla-polkit-compat</application>.  You shouldn't need to
+      run it directly, except for debugging purposes.
+    </para>
+
+    <para>
+      The arguments to <command>pkla-check-authorization</command> are, in
+      order:
+      <variablelist>
+	<varlistentry>
+	  <term><replaceable>user-name</replaceable></term>
+	  <listitem>
+	    <para>Name of the user account asking for authorization</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><replaceable>is-local</replaceable></term>
+	  <listitem><para>
+	    Whether the attempted action is performed from a local login
+	    session, <literal>true</literal> or <literal>false</literal>.
+	  </para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><replaceable>is-active</replaceable></term>
+	  <listitem><para>
+	    Whether the attempted action is performed from a currently active
+	    session (e.g. currently active virtual console),
+	    <literal>true</literal> or <literal>false</literal>.
+	  </para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><replaceable>action</replaceable></term>
+	  <listitem><para>
+	    A string identifying the
+	    <citerefentry>
+	      <refentrytitle>polkit</refentrytitle>
+	      <manvolnum>8</manvolnum>
+	    </citerefentry>
+	    action.
+	  </para></listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+
+    <para>
+      If the configuration specifies an authorization decision,
+      <command>pkla-check-authorization</command> outputs the decision and a
+      terminating newline.  If no decision is configured, the output is empty.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>OPTIONS</title>
+    <variablelist>
+      <varlistentry>
+	<term>
+	  <option>-h</option>, <option>--help</option>
+	</term>
+	<listitem><para>
+	  Write a summary of the available options to standard output
+	  and exit successfully.
+	</para></listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>-p</option>,
+	  <option>--paths</option>=<replaceable>paths</replaceable>
+	</term>
+	<listitem><para>
+	  Search for configuration files in semicolon-separated
+	  <replaceable>paths</replaceable> instead of the default
+	  <filename>/var/lib/polkit-1/localauthority;/etc/polkit-1/localauthority</filename>.
+	</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>EXIT STATUS</title>
+    <para>
+      <command>pkla-check-authorization</command> exits with 0 on success (even
+      if there is no decision configured), and a non-zero status on error.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>DIRECTORY STRUCTURE</title>
+    <para>
+      Files with <filename>.pkla</filename> extension are read from all
+      directories located inside the
+      <filename>/etc/polkit-1/localauthority</filename> and
+      <filename>/var/lib/polkit-1/localauthority</filename> directories (or as
+      specified using the <option>--paths</option> option).  By default, the
+      following sub-directories are installed.
+    </para>
+    <programlisting>
+/etc/polkit-1/
+`-- localauthority
+    |-- 10-vendor.d
+    |-- 20-org.d
+    |-- 30-site.d
+    |-- 50-local.d
+    `-- 90-mandatory.d
+    </programlisting>
+    <para>
+      and
+    </para>
+    <programlisting>
+/var/lib/polkit-1/
+`-- localauthority
+    |-- 10-vendor.d
+    |-- 20-org.d
+    |-- 30-site.d
+    |-- 50-local.d
+    `-- 90-mandatory.d
+    </programlisting>
+    <para>
+      The <filename>/etc/polkit-1/localauthority</filename> hierarchy
+      is intended for local configuration and
+      the <filename>/var/lib/polkit-1/localauthority</filename> is
+      intended for 3rd party packages.
+    </para>
+    <para>
+      Each <filename>.pkla</filename> file contains one or more
+      authorization entries. If the underlying filesystem supports
+      file monitoring, the Local Authority will reload information
+      whenever <filename>.pkla</filename> files are added, removed or
+      changed.
+    </para>
+    <para>
+      Each directory is intended for a specific audience
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><emphasis>10-vendor.d</emphasis></term>
+        <listitem>
+          <para>
+            Intended for use by the OS vendor.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>20-org.d</emphasis></term>
+        <listitem>
+          <para>
+            Intended for the organization deploying the OS.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>30-site.d</emphasis></term>
+        <listitem>
+          <para>
+            Intended for the site deploying the system.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>50-local.d</emphasis></term>
+        <listitem>
+          <para>
+            Intended for local usage.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>90-mandatory.d</emphasis></term>
+        <listitem>
+          <para>
+            Intended for the organization deploying the OS.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      and new directories can be added/removed as needed.
+    </para>
+    <para>
+      As to regards to the content, each <filename>.pkla</filename>
+      file is a standard <emphasis>key file</emphasis> and contains
+      key/value pairs in one or more groups with each group
+      representing an authorization entry.
+      A <filename>.pkla</filename> file MUST be named by using a
+      scheme to ensure that the name is unique, e.g. reverse DNS
+      notation or similar. For example, if the organization is
+      <quote>Acme Corp</quote> needs to modify policy for the
+      product <quote>Frobnicator</quote>, a name
+      like <filename>com.acme.frobnicator.pkla</filename> would be
+      suitable.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHORIZATION ENTRY</title>
+    <para>
+      Each group in a <filename>.pkla</filename> file must have a name
+      that is unique within the file it belongs to. The following keys
+      are recognized:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><emphasis>Identity</emphasis></term>
+        <listitem>
+          <para>
+            A semi-colon separated list of entries to match identities. Each
+            entry should start with <literal>unix-user:</literal> or
+            <literal>unix-group:</literal> to specify whether to match on a
+            UNIX user name or a UNIX group name, and continue with a glob
+            matching the group or user name. Netgroups are supported with the
+            <literal>unix-netgroup:</literal> prefix, but cannot support glob
+            syntax.  Finally, an entry "<literal>default</literal>" (with no
+            prefix) can be used to specify the default match.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>Action</emphasis></term>
+        <listitem>
+          <para>
+            A semi-colon separated list of globs to match action identifiers.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>ResultActive</emphasis></term>
+        <listitem>
+          <para>
+            The result to return for subjects in an active local
+            session that matches one or more of the given identities.
+            Allowed values are similar to what can be used in
+            the <emphasis>defaults</emphasis> section
+            of <filename>.policy</filename> files used to define
+            actions, e.g.
+            <literal>yes</literal>,
+            <literal>no</literal>,
+            <literal>auth_self</literal>,
+            <literal>auth_self_keep</literal>,
+            <literal>auth_admin</literal> and
+            <literal>auth_admin_keep</literal>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>ResultInactive</emphasis></term>
+        <listitem>
+          <para>
+            Like <emphasis>ResultActive</emphasis> but instead applies
+            to subjects in inactive local sessions.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>ResultAny</emphasis></term>
+        <listitem>
+          <para>
+            Like <emphasis>ResultActive</emphasis> but instead applies
+            to any subject.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      All keys specified above are required except that only at least one
+      of <emphasis>ResultAny</emphasis>, <emphasis>ResultInactive</emphasis>
+      and <emphasis>ResultActive</emphasis> must
+      be present.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>EVALUATION ORDER</title>
+    <para>
+      The authorization entries discussed above are consulted using the
+      following algorithm.
+    </para>
+    <para>
+      The authorization entries from all .pkla files are ordered using
+      the following rules. First all the basename of all
+      sub-directories (e.g. <emphasis>30-site.d</emphasis>) from both
+      the <filename>/etc/polkit-1/localauthority</filename>
+      and <filename>/var/lib/polkit-1/localauthority</filename>
+      directories are enumerated and sorted (using the C locale). If a
+      name exists in both <filename>/etc</filename>
+      and <filename>/var</filename>, the one
+      in <filename>/etc</filename> takes precedence. Then
+      all <filename>.pkla</filename> files are read in order from this
+      list of sub-directories. For each <filename>.pkla</filename>
+      file, authorizations from each file are appended in order resulting
+      in an ordered list of authorization entries.
+    </para>
+    <para>
+      For example, given the following files
+    </para>
+    <programlisting>
+/var/lib/polkit-1
+└── localauthority
+    ├── 10-vendor.d
+    │   └── 10-desktop-policy.pkla
+    ├── 20-org.d
+    ├── 30-site.d
+    ├── 50-local.d
+    ├── 55-org.my.company.d
+    │   └── 10-org.my.company.product.pkla
+    └── 90-mandatory.d
+
+/etc/polkit-1
+└── localauthority
+    ├── 10-vendor.d
+    │   └── 01-some-changes-from-a-subvendor.pkla
+    ├── 20-org.d
+    ├── 30-site.d
+    ├── 50-local.d
+    ├── 55-org.my.company.d
+    │   └── 10-org.my.company.product.pkla
+    └── 90-mandatory.d
+    </programlisting>
+    <para>
+      the evaluation order of the <filename>.pkla</filename> files is:
+    </para>
+    <orderedlist>
+      <listitem>
+	<para>
+          <filename>10-desktop-policy.pkla</filename>
+        </para>
+      </listitem>
+      <listitem>
+	<para>
+          <filename>01-some-changes-from-a-subvendor.pkla</filename>
+        </para>
+      </listitem>
+      <listitem>
+	<para>
+          <filename>10-org.my.company.product.pkla</filename> (the <filename>/var</filename> one)
+        </para>
+      </listitem>
+      <listitem>
+	<para>
+          <filename>10-org.my.company.product.pkla</filename> (the <filename>/etc</filename> one)
+        </para>
+      </listitem>
+    </orderedlist>
+    <para>
+      When the list of authorization entries has been calculated, the
+      authorization check can be made. First, the user of the Subject
+      is determined and the groups that the user belongs are looked
+      up.
+    </para>
+    <para>
+      Then, authorization entries that include the "<literal>default</literal>"
+      field value in the <emphasis>Identity</emphasis> field are consulted in
+      order.  If the authorization entry matches the data from the
+      authorization check, then the authorization result from
+      <emphasis>RequireAny</emphasis>, <emphasis>RequireInactive</emphasis> or
+      <emphasis>RequireActive</emphasis> is used.
+    </para>
+    <para>
+      Next, for each group identity, all authorization entries that contain a
+      matching group entry are again consulted in the same manner.
+    </para>
+    <para>
+      Finally, the authorization entries are consulted using the user
+      identity in the same manner.
+    </para>
+    <para>
+      Note that processing continues even after a match. This allows
+      for so called <quote>negative authorizations</quote>, see
+      <xref linkend="pkla-check-authorization-examples"/> for further
+      discussion.
+    </para>
+  </refsect1>
+
+  <refsect1 id="pkla-check-authorization-examples">
+    <title>EXAMPLE</title>
+    <para>
+      The following <filename>.pkla</filename> file grants
+      authorization to all users in the <literal>staff</literal> group
+      for actions matching the
+      glob <literal>com.example.awesomeproduct.*</literal> provided
+      they are in an active session on the local console:
+    </para>
+    <programlisting>
+[Normal Staff Permissions]
+Identity=unix-group:staff
+Action=com.example.awesomeproduct.*
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+    </programlisting>
+    <para>
+      If the users <literal>homer</literal> and <literal>grimes</literal> are member of
+      the <literal>staff</literal> group but policy requires that an
+      administrator needs to authenticate every time authorization for
+      any action
+      matching <literal>com.example.awesomeproduct.*</literal> is
+      required, one would add
+    </para>
+    <programlisting>
+[Exclude Some Problematic Users]
+Identity=unix-user:homer;unix-user:grimes
+Action=com.example.awesomeproduct.*
+ResultAny=no
+ResultInactive=no
+ResultActive=auth_admin
+    </programlisting>
+    <para>
+      and make sure this authorization entry is after the first one.
+    </para>
+    <para>
+      The following entry modifies the default authorization decision (it is
+      overridden by any entry that matches using <literal>unix-user:</literal>
+      or <literal>unix-group:</literal>, but overrides any defaults set by the
+      application author in an <literal>.action</literal> file):
+    </para>
+    <programlisting>
+[Disable Access by Default]
+Identity=default
+Action=com.example.awesomeproduct.*
+ResultAny=no
+ResultInactive=no
+ResultActive=no
+    </programlisting>
+  </refsect1>
+
+  <refsect1>
+    <title>FILES</title>
+    <variablelist>
+      <varlistentry>
+	<term><filename>/etc/polkit-1/localauthority</filename></term>
+	<term><filename>/var/lib/polkit-1/localauthority</filename></term>
+	<listitem><para>
+	  Default directories containing decision configuration files.
+	</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1><title>AUTHOR</title>
+    <para>
+      Written by David Zeuthen <email>davidz@redhat.com</email> with a lot of
+      help from many others.  Adapted by Miloslav Trmač
+      <email>mitr@redhat.com</email>.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+      <citerefentry>
+        <refentrytitle>polkit</refentrytitle><manvolnum>8</manvolnum>
+      </citerefentry>
+    </para>
+  </refsect1>
+</refentry>
+

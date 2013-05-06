@@ -1,0 +1,210 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" []>
+<refentry>
+  <refentryinfo>
+    <title>pkla-admin-identities</title>
+    <date>May 2013</date>
+    <productname>polkit-pkla-compat</productname>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle>pkla-admin-identities</refentrytitle>
+    <manvolnum>8</manvolnum>
+    <refmiscinfo class="version"></refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>pkla-admin-identities</refname>
+    <refpurpose>List pklocalauthority-configured polkit administrators</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>pkla-admin-identities</command>
+      <arg><option>--help</option></arg>
+    </cmdsynopsis>
+
+    <cmdsynopsis>
+      <command>pkla-admin-identities</command>
+      <arg>
+	<option>--config-path</option>
+	<replaceable>config-path</replaceable>
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>DESCRIPTION</title>
+    <para>
+      <command>pkla-admin-identities</command> interprets configuration files
+      described below to determine which users
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>
+      considers administrators, using a non-JavaScript configuration file
+      format described below.
+    </para>
+
+    <para>
+      <emphasis>Note:</emphasis> Determining which users are considered
+      administrators is driven by JavaScript rules as described in
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>.
+      <command>pkla-admin-identities</command> is called by a JavaScript rule
+      file named <filename>50-pkla.rules</filename>; other JavaScript rules
+      with a higher priority may exist, so the
+      <command>pkla-admin-identities</command> configuration may not necessarily
+      govern the final decision by
+      <citerefentry>
+	<refentrytitle>polkit</refentrytitle>
+	<manvolnum>8</manvolnum>
+      </citerefentry>.
+    </para>
+
+    <para>
+      The ordering of the JavaScript rule files and the ordering of
+      <command>pkla-admin-identities</command> configuration files is not
+      integrated and uses different rules; the
+      <command>pkla-admin-identities</command> configuration evaluation is
+      happens at a single point within the JavaScript rule evaluation
+      order.
+    </para>
+
+    <para>
+      <command>pkla-admin-identities</command> is an internal helper program of
+      <application>pkla-polkit-compat</application>.  You shouldn't need to run
+      it directly, except for debugging purposes.
+    </para>
+
+    <para>
+      Configuration is read from files in the
+      <filename>/etc/polkit-1/localauthority.conf.d</filename> directory.  All
+      files are read in lexicographical order (using the C locale), meaning
+      that later files can override earlier ones.  The file
+      <filename>50-localauthority.conf</filename> contains the settings
+      provided by the OS vendor.  Users and 3rd party packages can drop
+      configuration files with a priority higher than 60 to change the
+      defaults.  The configuration file format is simple.  Each configuration
+      file is a <emphasis>key file</emphasis> (also commonly known as a
+      <emphasis>ini file</emphasis>) with a single group called
+      <literal>[Configuration]</literal>.  Only a single key,
+      <literal>AdminIdentities</literal> is read.  The value of this key is a
+      semi-colon separated list of identities that can be used when
+      administrator authentication is required.  Users are specified by
+      prefixing the user name with <literal>unix-user:</literal>, groups of
+      users are specified by prefixing with <literal>unix-group:</literal>, and
+      netgroups of users are specified with <literal>unix-netgroup:</literal>.
+      See <xref linkend="pkla-admin-identities-examples"/> for an example of a
+      configuration file.
+    </para>
+
+    <para>
+      <command>pkla-admin-identities</command> outputs the resulting
+      configuration of administrator identities, one identity per line, using
+      the same format (including e.g. the <literal>unix-user:</literal> prefix).
+      If no administrator identities are configured in the above-described
+      configuration files, the output will be empty.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>OPTIONS</title>
+    <variablelist>
+      <varlistentry>
+	<term>
+	  <option>-h</option>, <option>--help</option>
+	</term>
+	<listitem><para>
+	  Write a summary of the available options to standard output
+	  and exit successfully.
+	</para></listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>
+	  <option>-c</option>,
+	  <option>--config-path</option>=<replaceable>config-path</replaceable>
+	</term>
+	<listitem><para>
+	  Search for configuration files in
+	  <replaceable>config-path</replaceable> instead of the default
+	  <filename>/etc/polkit-1/localauthority.conf.d</filename>.
+	</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>EXIT STATUS</title>
+    <para>
+      <command>pkla-admin-identities</command> exits with 0 on success (even if
+      there are no administrator identities), and a non-zero status on error.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>FILES</title>
+    <variablelist>
+      <varlistentry>
+	<term><filename>/etc/polkit-1/localauthority.conf.d</filename></term>
+	<listitem><para>
+	  Default directory containing configuration files.
+	</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1 id="pkla-admin-identities-examples">
+    <title>EXAMPLE</title>
+    <para>
+      The following <filename>.conf</filename> file
+    </para>
+    <programlisting>
+[Configuration]
+AdminIdentities=unix-group:staff
+    </programlisting>
+    <para>
+      specifies that any user in the <literal>staff</literal> UNIX group can be
+      used for authentication when administrator authentication is needed.
+      This file would typically be installed in the
+      <filename>/etc/polkit-1/localauthority.conf.d</filename> directory and
+      given the name <filename>60-desktop-policy.conf</filename> to ensure that
+      it is evaluated after the <filename>50-localauthority.conf</filename> file
+      shipped with <application>pkla-polkit-compat</application>.  If the local
+      administrator wants to override this (suppose
+      <filename>60-desktop-policy.conf</filename> was shipped as part of the
+      OS) he can simply create a file
+      <filename>99-my-admin-configuration.conf</filename> with the following
+      content
+    </para>
+    <programlisting>
+[Configuration]
+AdminIdentities=unix-user:lisa;unix-user:marge
+    </programlisting>
+    <para>
+      to specify that only the users <literal>lisa</literal>
+      and <literal>marge</literal> can authenticate when
+      administrator authentication is needed.
+    </para>
+  </refsect1>
+
+  <refsect1><title>AUTHOR</title>
+    <para>
+      Written by David Zeuthen <email>davidz@redhat.com</email> with a lot of
+      help from many others.  Adapted by Miloslav Trmač
+      <email>mitr@redhat.com</email>.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+      <citerefentry>
+        <refentrytitle>polkit</refentrytitle><manvolnum>8</manvolnum>
+      </citerefentry>
+    </para>
+  </refsect1>
+</refentry>

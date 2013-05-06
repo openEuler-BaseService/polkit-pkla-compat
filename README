@@ -4,6 +4,31 @@ polkit-pkla-compat is a polkit JavaScript rule and associated helpers
 that mostly provide compatibility with the .pkla file format supported in
 polkit <= 0.105 for users of later polkit releases.
 
+New releases will be available at https://fedorahosted.org/polkit-pkla-compat/ .
+
+Installation
+============
+See INSTALL for generic installation instructions.
+
+Make sure that the directories that contain the configuration, as printed by
+(./configure) are only writable by root, and readable by the polkit daemon.
+Unprivileged users usually don't need to view the configuration.  (make install)
+will do this for you if the polkitd group exists; it is therefore recommended
+to install polkit before this package (or let your distribution handle the
+packaging and file permissions.)
+
+Compatibility with polkit-0.105
+===============================
+Compared to polkit-0.105, there are two behavior changes:
+- ReturnValue configuration is no longer supported: the JavaScript mechanism
+  can not express such rules.
+- "Identity=default" is now available, and evaluated with lower priority
+  than any "unix-group" identity.
+
+Mailing list
+============
+polkit-pkla-compat@lists.fedorahosted.org
+
 Bugs
 ====
 Please consider reporting the bug to your distribution's bug tracking system.

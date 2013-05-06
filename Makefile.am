@@ -20,7 +20,8 @@ SUBDIRS = po test
 
 bin_PROGRAMS = src/pkla-admin-identities src/pkla-check-authorization
 dist_localauthorityconfig_DATA = src/50-localauthority.conf
-man_MANS = docs/pklocalauthority.8
+man_MANS = docs/pkla-admin-identities.8 docs/pkla-check-authorization.8 \
+	docs/pklocalauthority.8
 rules_DATA = src/50-pkla.rules
 
 noinst_LIBRARIES = src/libpolkit-backend.a test/libpolkit-test-helper.a
@@ -32,7 +33,9 @@ TESTS = $(check_PROGRAMS)
 
 ## Rules
 CLEANFILES = $(man_MANS) $(rules_DATA)
-EXTRA_DIST = docs/pklocalauthority.xml src/50-pkla.rules.in test/data
+EXTRA_DIST = docs/pkla-admin-identities.xml docs/pkla-check-authorization.xml \
+	docs/pklocalauthority.xml \
+	src/50-pkla.rules.in test/data
 
 src_libpolkit_backend_a_SOURCES = src/polkitbackendlocalauthorizationstore.c \
 	src/polkitbackendlocalauthorizationstore.h
