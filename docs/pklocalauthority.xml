@@ -6,6 +6,11 @@
     <title>pklocalauthority</title>
     <date>May 2013</date>
     <productname>polkit-pkla-compat</productname>
+    <author>
+      <firstname>Miloslav</firstname><surname>Trmač</surname>
+      <contrib>Author</contrib>
+      <email>mitr@redhat.com</email>
+    </author>
   </refentryinfo>
 
   <refmeta>
