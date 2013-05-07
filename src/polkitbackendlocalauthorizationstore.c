@@ -657,13 +657,13 @@ polkit_backend_local_authorization_store_ensure (PolkitBackendLocalAuthorization
             }
           g_strfreev (groups);
 
-          store->priv->authorizations = g_list_reverse (store->priv->authorizations);
-
           g_key_file_free (key_file);
         }
 
       g_free (filename);
     }
+
+  store->priv->authorizations = g_list_reverse (store->priv->authorizations);
 
   store->priv->has_data = TRUE;
 
