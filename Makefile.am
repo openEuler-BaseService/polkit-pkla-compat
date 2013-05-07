@@ -68,5 +68,5 @@ install-data-local:
 		http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 
 src/49-polkit-pkla-compat.rules: src/49-polkit-pkla-compat.rules.in Makefile
-	sed 's,@bindir@,$(bindir),g' \
+	sed 's,@''bindir''@,$(bindir),g' \
 		< $(srcdir)/src/49-polkit-pkla-compat.rules.in > $@
