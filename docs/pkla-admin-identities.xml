@@ -81,10 +81,10 @@
     </para>
 
     <para>
-      Configuration is read from files in the
-      <filename>/etc/polkit-1/localauthority.conf.d</filename> directory.  All
-      files are read in lexicographical order (using the C locale), meaning
-      that later files can override earlier ones.  The file
+      Configuration is read from files with a <literal>.conf</literal>
+      extension in the <filename>/etc/polkit-1/localauthority.conf.d</filename>
+      directory.  All files are read in lexicographical order (using the C
+      locale), meaning that later files can override earlier ones.  The file
       <filename>50-localauthority.conf</filename> contains the settings
       provided by the OS vendor.  Users and 3rd party packages can drop
       configuration files with a priority higher than 60 to change the
