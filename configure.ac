@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59c)
 AC_INIT([polkit-pkla-compat], [0.1],
-	[https://fedorahosted.org/polkit-pkla-compat/])
+	[https://pagure.io/polkit-pkla-compat])
 AC_CONFIG_AUX_DIR([admin])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([no-dist-gzip dist-xz no-define subdir-objects])

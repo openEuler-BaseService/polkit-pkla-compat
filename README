@@ -4,7 +4,7 @@ polkit-pkla-compat is a polkit JavaScript rule and associated helpers
 that mostly provide compatibility with the .pkla file format supported in
 polkit <= 0.105 for users of later polkit releases.
 
-New releases will be available at https://fedorahosted.org/polkit-pkla-compat/ .
+New releases will be available at https://pagure.io/polkit-pkla-compat .
 
 Installation
 ============
@@ -33,5 +33,5 @@ Bugs
 ====
 Please consider reporting the bug to your distribution's bug tracking system.
 
-Otherwise, report bugs at https://fedorahosted.org/polkit-pkla-compat/ .
-Bug reports with patches are especially welcome.
+Otherwise, report bugs at https://pagure.io/polkit-pkla-compat .  Pull
+requests are especially welcome.
